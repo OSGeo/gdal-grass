@@ -17,7 +17,7 @@ set -u
 # versionless in future?
 GRASS=grass$(pkg-config --modversion grass | cut -d. -f1,2 | sed 's+\.++g')
 
-export GDAL_AUTOLOAD_DIR"=$1
+export GDAL_AUTOLOAD_DIR=$1
 
 ./configure \
     --prefix=/usr \
