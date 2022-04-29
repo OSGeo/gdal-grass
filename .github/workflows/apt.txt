@@ -1,3 +1,4 @@
+gdal-bin
 grass
 grass-dev
 libgdal-dev
