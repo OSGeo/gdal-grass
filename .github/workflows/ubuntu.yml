@@ -18,6 +18,6 @@ jobs:
           mkdir $HOME/gdalplugins
       - name: Build
         run: .github/workflows/build_ubuntu.sh $HOME/gdalplugins
-#      - name: Test executing of GDAL with driver on GRASS maps
-#        run: .github/workflows/test_simple.sh
+      - name: Test executing of GDAL with driver on GRASS maps
+        run: .github/workflows/test_simple.sh
 

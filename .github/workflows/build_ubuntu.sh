@@ -21,7 +21,7 @@ export GDAL_AUTOLOAD_DIR"=$1
 
 ./configure \
     --prefix=/usr \
-    --with-autoload=${GDAL_AUTOLOAD_DIR"} \
+    --with-autoload=${GDAL_AUTOLOAD_DIR} \
     --with-grass=/usr/lib/${GRASS} \
     --with-postgres-includes=$(pg_config --includedir)
 
