@@ -25,5 +25,5 @@ GRASS=grass$(pkg-config --modversion grass | cut -d. -f1,2 | sed 's+\.++g')
     --with-grass=/usr/lib/${GRASS} \
     --with-postgres-includes=$(pg_config --includedir)
 
-eval $makecmd
+make
 make install
