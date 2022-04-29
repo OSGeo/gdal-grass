@@ -14,9 +14,8 @@ fi
 # non-existent variables as an errors
 set -u
 
-PKGNAME=$(shell grep Package: debian/control | head -1 | cut -d' ' -f2)
-GRASS=grass$(subst .,,$(shell pkg-config --modversion grass | cut -d. -f1,2))
-GRASS_ABI=grass$(subst .,,$(shell pkg-config --modversion grass | cut -d. -f1,2,3 | sed -e 's/RC/-/')) 
+# versionless in future?
+GRASS=grass$(pkg-config --modversion grass | cut -d. -f1,2 | sed 's+\.++g')
 
 export INSTALL_PREFIX=$1
 
