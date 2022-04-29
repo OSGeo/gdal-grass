@@ -19,6 +19,8 @@ GRASS=grass$(pkg-config --modversion grass | cut -d. -f1,2 | sed 's+\.++g')
 
 #? export INSTALL_PREFIX=$1
 
+mkdir -p /usr/lib/gdalplugins
+
 ./configure \
     --prefix=/usr \
     --with-autoload=/usr/lib/gdalplugins \
