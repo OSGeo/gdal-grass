@@ -22,7 +22,7 @@ GRASS=grass$(pkg-config --modversion grass | cut -d. -f1,2 | sed 's+\.++g')
 ./configure \
     --prefix=/usr \
     --with-autoload=/usr/lib/gdalplugins \
-    --with-grass=/usr/lib/$(GRASS) \
+    --with-grass=/usr/lib/${GRASS} \
     --with-postgres-includes=$(pg_config --includedir)
 
 eval $makecmd
