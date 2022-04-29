@@ -17,13 +17,11 @@ set -u
 # versionless in future?
 GRASS=grass$(pkg-config --modversion grass | cut -d. -f1,2 | sed 's+\.++g')
 
-#? export INSTALL_PREFIX=$1
-
-mkdir -p /usr/lib/gdalplugins
+export GDAL_AUTOLOAD=$1
 
 ./configure \
     --prefix=/usr \
-    --with-autoload=/usr/lib/gdalplugins \
+    --with-autoload=${GDAL_AUTOLOAD} \
     --with-grass=/usr/lib/${GRASS} \
     --with-postgres-includes=$(pg_config --includedir)
 

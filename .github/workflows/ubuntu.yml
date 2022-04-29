@@ -13,7 +13,7 @@ jobs:
           sudo apt-get install -y wget git gawk findutils
           xargs -a <(awk '! /^ *(#|$)/' ".github/workflows/apt.txt") -r -- \
               sudo apt-get install -y --no-install-recommends --no-install-suggests
-      - name: Create installation directory
+      - name: Create GDAL_AUTOLOAD directory
         run: |
           mkdir $HOME/gdalplugins
       - name: Build
