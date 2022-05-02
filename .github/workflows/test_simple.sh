@@ -25,8 +25,10 @@ export GDAL_DRIVER_PATH=${GDAL_AUTOLOAD_DIR}
  rm -f nc_spm_08_micro.zip )
 
 # Using LD_LIBRARY_PATH workaround for GRASS GIS < 7.8.8
+LD_LIBRARY_PATH=$(grass78 --config path)/lib
+
 # test GRASS GIS raster map
-LD_LIBRARY_PATH=$(pkg-config --libs-only-L grass | sed 's+-L++g') gdalinfo $HOME/grassdata/nc_spm_08_micro/PERMANENT/cellhd/elevation
+gdalinfo $HOME/grassdata/nc_spm_08_micro/PERMANENT/cellhd/elevation
 
 # test GRASS GIS vector map
-LD_LIBRARY_PATH=$(pkg-config --libs-only-L grass | sed 's+-L++g') ogrinfo -so -al $HOME/grassdata/nc_spm_08_micro/PERMANENT/vector/firestations/head
+ogrinfo -so -al $HOME/grassdata/nc_spm_08_micro/PERMANENT/vector/firestations/head
