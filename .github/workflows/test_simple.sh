@@ -20,12 +20,12 @@ export GDAL_DRIVER_PATH=${GDAL_AUTOLOAD_DIR}
 # add small GRASS GIS dataset for tests
 (mkdir -p $HOME/grassdata && \
  cd $HOME/grassdata/ && \
- wget --quiet https://grass.osgeo.org/sampledata/north_carolina/nc_spm_08_micro.zip && \
+ wget -c --quiet https://grass.osgeo.org/sampledata/north_carolina/nc_spm_08_micro.zip && \
  unzip nc_spm_08_micro.zip && \
  rm -f nc_spm_08_micro.zip )
 
 # workaround for GRASS GIS < 7.8.8
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pkg-config --libs-only-L grass)
+export LD_LIBRARY_PATH=$(pkg-config --libs-only-L grass)
 
 # test GRASS GIS raster map
 gdalinfo $HOME/grassdata/nc_spm_08_micro/PERMANENT/cellhd/elevation
