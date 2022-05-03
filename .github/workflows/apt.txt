@@ -1,0 +1,6 @@
+gdal-bin
+grass
+grass-dev
+libgdal-dev
+libpq-dev
+pkg-config
