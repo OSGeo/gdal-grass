@@ -22,9 +22,9 @@ OLIBNAME =	ogr_GRASS.so
 default:	$(GLIBNAME) $(OLIBNAME)
 
 install:	default
-	install -d $(AUTOLOAD_DIR)
-	cp $(GLIBNAME) $(AUTOLOAD_DIR)
-	cp $(OLIBNAME) $(AUTOLOAD_DIR)
+	install -d $(DESTDIR)$(AUTOLOAD_DIR)
+	cp $(GLIBNAME) $(DESTDIR)$(AUTOLOAD_DIR)
+	cp $(OLIBNAME) $(DESTDIR)$(AUTOLOAD_DIR)
 
 clean:
 	rm -f $(OLIBNAME) $(GLIBNAME) *.o
