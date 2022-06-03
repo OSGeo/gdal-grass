@@ -25,11 +25,11 @@ sudo make install
 Access GRASS GIS raster data from GDAL:
 
 ```
-gdalinfo /home/mneteler/grassdata/nc_spm_08_grass7/PERMANENT/cellhd/elevation
+gdalinfo ~/grassdata/nc_spm_08_grass7/PERMANENT/cellhd/elevation
 ```
 
 Access GRASS GIS vector data from GDAL-OGR:
 
 ```
-ogrinfo -so -al /home/mneteler/grassdata/nc_spm_08_grass7/PERMANENT/vector/zipcodes/head
+ogrinfo -so -al ~/grassdata/nc_spm_08_grass7/PERMANENT/vector/zipcodes/head
 ```
