@@ -53,6 +53,8 @@ extern "C" {
 char *GPJ_grass_to_wkt( const struct Key_Value *,
                         const struct Key_Value *,
                         int, int );
+
+void GDALRegister_GRASS();
 }
 
 #define GRASS_MAX_COLORS 100000  // what is the right value
