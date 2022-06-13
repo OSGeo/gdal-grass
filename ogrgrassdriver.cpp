@@ -30,6 +30,10 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
+extern "C" {
+    void RegisterOGRGRASS();
+}
+
 CPL_CVSID("$Id$")
 
 /************************************************************************/
