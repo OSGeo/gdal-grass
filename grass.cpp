@@ -95,7 +95,7 @@ class GRASSDataset final: public GDALDataset
 
     struct Cell_head sCellInfo; /* raster region */
 
-    char        *pszProjection;
+    OGRSpatialReference m_oSRS{};
 
     double      adfGeoTransform[6];
 
@@ -103,10 +103,7 @@ class GRASSDataset final: public GDALDataset
     GRASSDataset();
     ~GRASSDataset() override;
 
-    const char *_GetProjectionRef(void) override;
-    const OGRSpatialReference* GetSpatialRef() const override {
-        return GetSpatialRefFromOldGetProjectionRef();
-    }
+    const OGRSpatialReference* GetSpatialRef() const override;
     CPLErr GetGeoTransform( double * ) override;
 
     static GDALDataset *Open( GDALOpenInfo * );
@@ -718,7 +715,7 @@ double GRASSRasterBand::GetNoDataValue( int *pbSuccess )
 
 GRASSDataset::GRASSDataset()
 {
-    pszProjection = NULL;
+    m_oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
 
     adfGeoTransform[0] = 0.0;
     adfGeoTransform[1] = 1.0;
@@ -746,20 +743,15 @@ GRASSDataset::~GRASSDataset()
 
     if ( pszElement )
         G_free ( pszElement );
-
-    G_free( pszProjection );
 }
 
 /************************************************************************/
-/*                          GetProjectionRef()                          */
+/*                          GetSpatialRef()                             */
 /************************************************************************/
 
-const char *GRASSDataset::_GetProjectionRef()
+const OGRSpatialReference *GRASSDataset::GetSpatialRef() const
 {
-    if( pszProjection == NULL )
-        return "";
-    else
-        return pszProjection;
+    return m_oSRS.IsEmpty() ? nullptr : &m_oSRS;
 }
 
 /************************************************************************/
@@ -974,9 +966,12 @@ GDALDataset *GRASSDataset::Open( GDALOpenInfo * poOpenInfo )
 
     projinfo = G_get_projinfo();
     projunits = G_get_projunits();
-    poDS->pszProjection = GPJ_grass_to_wkt ( projinfo, projunits, 0, 0);
+    char* pszWKT = GPJ_grass_to_wkt ( projinfo, projunits, 0, 0);
     if (projinfo) G_free_key_value(projinfo);
     if (projunits) G_free_key_value(projunits);
+    if( pszWKT )
+        poDS->m_oSRS.importFromWkt(pszWKT);
+    G_free( pszWKT );
 
 /* -------------------------------------------------------------------- */
 /*      Create band information objects.                                */
