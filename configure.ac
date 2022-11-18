@@ -108,7 +108,7 @@ AC_MSG_RESULT(using $AUTOLOAD_DIR as GDAL shared library autoload directory)
 AC_SUBST(AUTOLOAD_DIR,$AUTOLOAD_DIR)
 
 dnl ---------------------------------------------------------------------------
-dnl Find GRASS 5.7 or GRASS 7
+dnl Find GRASS GIS
 dnl ---------------------------------------------------------------------------
 
 GRASS_SETTING=no
@@ -160,15 +160,23 @@ AC_SUBST(GRASS_GISBASE,$GRASS_GISBASE)
 dnl ---------------------------------------------------------------------------
 
 dnl ---------------------------------------------------------------------------
-dnl Find PostgreSQL (GRASS optional dependency)
+dnl Find PostgreSQL (GRASS GIS optional dependency)
 dnl ---------------------------------------------------------------------------
 
-AC_ARG_WITH(postgres_includes,[  --with-postgres-includes=DIR     use PostgreSQL includes in DIR], postgres_includes="$withval", postgres_includes=no)
+# Scan GRASS_INCLUDE for USE_POSTGRES already enabled in GRASS GIS
+grep USE_POSTGRES $with_grass/include/Make/Platform.make | cut -d'=' -f2 | tr -s ' ' ' ' | cut -d' ' -f2 | grep 1 > /dev/null && G_PG_ENABLED=1
+# Scan for PG include path if enabled in GRASS GIS
+if test $G_PG_ENABLED -eq 1  ; then
+   PQ_INCLUDE=`grep pgsql $with_grass/include/Make/Platform.make | cut -d'=' -f2 | tr -s ' ' ' ' | cut -d' ' -f2`
+   echo "PostgreSQL already enabled in GRASS GIS. Using related PQ_INCLUDE path $PQ_INCLUDE"
+else
+   AC_ARG_WITH(postgres_includes,[  --with-postgres-includes=DIR     use PostgreSQL includes in DIR], postgres_includes="$withval", postgres_includes=no)
 
-PQ_INCLUDE=
-if test "x$postgres_includes" != "xno"; then
-# With PostgreSQL includes directory
-PQ_INCLUDE="-I$postgres_includes"
+   PQ_INCLUDE=
+   if test "x$postgres_includes" != "xno"; then
+   # With PostgreSQL includes directory
+   PQ_INCLUDE="-I$postgres_includes"
+   fi
 fi
 
 AC_SUBST(PQ_INCLUDE)
