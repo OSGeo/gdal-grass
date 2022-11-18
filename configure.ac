@@ -32,10 +32,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Makefile.in)
+AC_INIT
+AC_CONFIG_SRCDIR([Makefile.in])
 
 dnl We require autoconf 2.52+ for libtool support on cygwin/mingw hosts
-AC_PREREQ(2.52)
+AC_PREREQ([2.71])
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -176,7 +177,8 @@ dnl ---------------------------------------------------------------------------
 
 rm -f conftest*
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
 
 
 
