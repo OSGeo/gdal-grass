@@ -167,7 +167,7 @@ dnl ---------------------------------------------------------------------------
 grep USE_POSTGRES $with_grass/include/Make/Platform.make | cut -d'=' -f2 | tr -s ' ' ' ' | cut -d' ' -f2 | grep 1 > /dev/null && G_PG_ENABLED=1
 # Scan for PG include path if enabled in GRASS GIS
 if test $G_PG_ENABLED -eq 1  ; then
-   PQ_INCLUDE=`grep pgsql $with_grass/include/Make/Platform.make | cut -d'=' -f2 | tr -s ' ' ' ' | cut -d' ' -f2`
+   PQ_INCLUDE=`grep PQINCPATH $with_grass/include/Make/Platform.make | cut -d'=' -f2 | tr -s ' ' ' ' | cut -d' ' -f2`
    echo "PostgreSQL already enabled in GRASS GIS. Using related PQ_INCLUDE path $PQ_INCLUDE"
 else
    AC_ARG_WITH(postgres_includes,[  --with-postgres-includes=DIR     use PostgreSQL includes in DIR], postgres_includes="$withval", postgres_includes=no)
