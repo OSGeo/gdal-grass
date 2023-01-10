@@ -164,6 +164,7 @@ dnl Find PostgreSQL (GRASS GIS optional dependency)
 dnl ---------------------------------------------------------------------------
 
 # Scan GRASS_INCLUDE for USE_POSTGRES already enabled in GRASS GIS
+G_PG_ENABLED=0
 grep USE_POSTGRES $with_grass/include/Make/Platform.make | cut -d'=' -f2 | tr -s ' ' ' ' | cut -d' ' -f2 | grep 1 > /dev/null && G_PG_ENABLED=1
 # Scan for PG include path if enabled in GRASS GIS
 if test $G_PG_ENABLED -eq 1  ; then
