@@ -1,0 +1,42 @@
+---
+name: Publish gdal-grass driver
+
+on:
+  release:
+    types: [published]
+env:
+  OUT_DIR: ${{ github.workspace }}/.g_outdir
+  GDAL-GRASS: gdal-grass-${{ github.ref_name }}
+permissions:
+  contents: write
+jobs:
+  build-n-publish:
+    name: Build and publish gdal-grass driver
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+      - name: Create tarballs
+        run: |
+          mkdir ${{ env.OUT_DIR }}
+          cd ..
+          tar -cvf ${{ env.OUT_DIR }}/${{ env.GDAL-GRASS }}.tar --exclude=".g*" gdal-grass
+          cd ${{ env.OUT_DIR }}
+          gzip -9k ${{ env.GDAL-GRASS }}.tar
+          md5sum ${{ env.GDAL-GRASS }}.tar.gz > ${{ env.GDAL-GRASS }}.tar.gz.md5
+          sha256sum ${{ env.GDAL-GRASS }}.tar.gz > ${{ env.GDAL-GRASS }}.tar.gz.sha256
+          xz -9e ${{ env.GDAL-GRASS }}.tar
+          md5sum ${{ env.GDAL-GRASS }}.tar.xz > ${{ env.GDAL-GRASS }}.tar.xz.md5
+          sha256sum ${{ env.GDAL-GRASS }}.tar.xz > ${{ env.GDAL-GRASS }}.tar.xz.sha256
+      - name: Publish distribution to GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+              ${{ env.OUT_DIR }}/${{ env.GDAL-GRASS }}.tar.gz
+              ${{ env.OUT_DIR }}/${{ env.GDAL-GRASS }}.tar.gz.md5
+              ${{ env.OUT_DIR }}/${{ env.GDAL-GRASS }}.tar.gz.sha256
+              ${{ env.OUT_DIR }}/${{ env.GDAL-GRASS }}.tar.xz
+              ${{ env.OUT_DIR }}/${{ env.GDAL-GRASS }}.tar.xz.md5
+              ${{ env.OUT_DIR }}/${{ env.GDAL-GRASS }}.tar.xz.sha256
