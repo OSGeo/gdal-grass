@@ -22,14 +22,20 @@ sudo make install
 
 ## Usage
 
+Set the driver path:
+
+```bash
+GDAL_DRIVER_PATH="/usr/lib/gdalplugins"
+```
+
 Access GRASS GIS raster data from GDAL:
 
-```
+```bash
 gdalinfo $HOME/grassdata/nc_spm_08_grass7/PERMANENT/cellhd/elevation
 ```
 
 Access GRASS GIS vector data from GDAL-OGR:
 
-```
+```bash
 ogrinfo -so -al $HOME/grassdata/nc_spm_08_grass7/PERMANENT/vector/zipcodes/head
 ```
