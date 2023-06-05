@@ -2,10 +2,13 @@
 
 Description: GRASS GIS extension for the GDAL library
 
-GDAL is a translator library for raster geospatial data formats. As a library, it presents a single abstract data model to the calling application for all supported formats. This extension provides access to GRASS data via GDAL.
+GDAL is a translator library for raster geospatial data formats.
+As a library, it presents a single abstract data model to the
+calling application for all supported formats. This extension
+provides access to GRASS data via GDAL.
 
-This package contains the two standalone GDAL-GRASS GIS drivers
-(https://gdal.org/drivers/raster/grass.html and https://gdal.org/drivers/vector/grass.html)
+This package contains the two standalone GDAL-GRASS GIS drivers,
+the [raster driver](docs/grass_raster.md) and the [vector driver](docs/grass_vector.md)
 for [GRASS GIS](http://grass.osgeo.org/) raster and vector file support
 in [GDAL](https://gdal.org/).
 
@@ -21,7 +24,7 @@ To build this driver it is necessary for it to find GDAL and GRASS
 support files. Typically the configure and build process would look
 something like:
 
-```
+```bash
 ./configure --with-gdal=/usr/bin/gdal-config \
             --with-grass=/usr/grass
 make
@@ -50,13 +53,14 @@ ogrinfo -so -al $HOME/grassdata/nc_spm_08_grass7/PERMANENT/vector/zipcodes/head
 
 ## Where is the gdal-grass driver available?
 
-- Linux: https://repology.org/project/gdal-grass/versions
-- Windows: https://trac.osgeo.org/osgeo4w/
+- Linux: <https://repology.org/project/gdal-grass/versions>
+- Windows: <https://trac.osgeo.org/osgeo4w/>
 - other operating systems: please add here
 
 ## Version number has been restarted
 
-Note that during the transit of this driver out of core GDAL we have decided to reset the version numbering back to 1.
+Note that during the transit of this driver out of core GDAL we have
+decided to reset the version numbering back to 1.
 
 So: older packages show 3.x which the new driver is 1.x (or later).
 
@@ -77,7 +81,8 @@ We expect low maintenance needs for this driver.
 
 ## Using milestones
 
-For easier planning, each issue and pull request will be assigned to a [milestone](https://github.com/OSGeo/gdal-grass/milestones).
+For easier planning, each issue and pull request will be assigned
+to a [milestone](https://github.com/OSGeo/gdal-grass/milestones).
 
 ## QA / CI
 
@@ -85,11 +90,13 @@ Any pull request opened in this repository is compiled and tested with
 [GitHub Actions](https://github.com/OSGeo/gdal-grass/actions) against
 the GDAL version included in Ubuntu (see related
 [CI workflow](https://github.com/OSGeo/gdal-grass/blob/main/.github/workflows/ubuntu.yml)).
-Improvements and other workflows are welcome, ideally as a [pull request](https://github.com/OSGeo/gdal-grass/pulls).
+Improvements and other workflows are welcome, ideally as
+a [pull request](https://github.com/OSGeo/gdal-grass/pulls).
 
 ## Found a bug?
 
-Please open an [issue](https://github.com/OSGeo/gdal-grass/issues) describing the problem along with a reproducible example.
+Please open an [issue](https://github.com/OSGeo/gdal-grass/issues) describing
+the problem along with a reproducible example.
 
 ## Who is involved here?
 
