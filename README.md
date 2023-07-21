@@ -22,13 +22,29 @@ and finally build and install this driver in
 
 To build this driver it is necessary for it to find GDAL and GRASS
 support files. Typically the configure and build process would look
-something like:
+something like with Autotools:
 
 ```bash
 ./configure --with-gdal=/usr/bin/gdal-config \
             --with-grass=/usr/grass
 make
 sudo make install
+```
+
+Building with CMake:
+
+```bash
+cd gdal-grass
+mkdir build && cd build
+cmake ..
+cmake --build .
+cmake --install .
+
+# CMake usually works out the location of GDAL and GRASS, but at times you
+# may need/wish to set some configurations manually, e.g.:
+cmake .. -DAUTOLOAD_DIR=/opt/local/lib/gdalplugins \
+         -DGDAL_CONFIG_PREFER_PATH=/opt/local/bin \
+         -DGRASS_BIN_PREFER_PATH=/opt/local/bin
 ```
 
 ## Usage
