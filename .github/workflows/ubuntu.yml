@@ -22,7 +22,18 @@ jobs:
       - name: Create GDAL_AUTOLOAD directory
         run: |
           mkdir $HOME/gdalplugins
+      - name: Setup test data
+        run: |
+          mkdir -p $HOME/grassdata
+          cd $HOME/grassdata/
+          wget -c --quiet https://grass.osgeo.org/sampledata/north_carolina/nc_spm_08_micro.zip
+          unzip nc_spm_08_micro.zip
+          rm -f nc_spm_08_micro.zip       
       - name: Build
         run: .github/workflows/build_ubuntu.sh $HOME/gdalplugins
       - name: Test executing of GDAL with driver on GRASS maps
         run: .github/workflows/test_simple.sh $HOME/gdalplugins
+      - name: Build with CMake
+        run: .github/workflows/build_ubuntu_cmake.sh $HOME/gdalplugins_cmake
+      - name: Test executing of GDAL with driver on GRASS maps (CMake)
+        run: .github/workflows/test_simple.sh $HOME/gdalplugins_cmake

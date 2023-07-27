@@ -14,15 +14,7 @@ fi
 # non-existent variables as an errors
 set -u
 
-export GDAL_AUTOLOAD_DIR=$1
-export GDAL_DRIVER_PATH=${GDAL_AUTOLOAD_DIR}
-
-# add small GRASS GIS dataset for tests
-(mkdir -p $HOME/grassdata && \
- cd $HOME/grassdata/ && \
- wget -c --quiet https://grass.osgeo.org/sampledata/north_carolina/nc_spm_08_micro.zip && \
- unzip nc_spm_08_micro.zip && \
- rm -f nc_spm_08_micro.zip )
+export GDAL_DRIVER_PATH=$1
 
 # Using LD_LIBRARY_PATH workaround for GRASS GIS < 7.8.8
 export LD_LIBRARY_PATH=$(grass --config path)/lib
