@@ -1,5 +1,9 @@
+---
 name: Build on Ubuntu
-on: [push]
+
+on:
+  - push
+  - pull_request
 
 jobs:
   build:
@@ -12,7 +16,8 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y wget git gawk findutils
           xargs -a <(awk '! /^ *(#|$)/' ".github/workflows/apt.txt") -r -- \
-              sudo apt-get install -y --no-install-recommends --no-install-suggests
+              sudo apt-get install -y --no-install-recommends \
+              --no-install-suggests
       - name: Create GDAL_AUTOLOAD directory
         run: |
           mkdir $HOME/gdalplugins
@@ -20,4 +25,3 @@ jobs:
         run: .github/workflows/build_ubuntu.sh $HOME/gdalplugins
       - name: Test executing of GDAL with driver on GRASS maps
         run: .github/workflows/test_simple.sh $HOME/gdalplugins
-
