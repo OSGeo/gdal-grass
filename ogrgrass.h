@@ -127,8 +127,8 @@ class OGRGRASSDataSource final: public OGRDataSource
                         OGRGRASSDataSource();
                         virtual ~OGRGRASSDataSource();
 
-    int                 Open( const char *, int bUpdate, int bTestOpen,
-                              int bSingleNewFile = FALSE );
+    bool                Open( const char *, bool bUpdate, bool bTestOpen,
+                              bool bSingleNewFile = false );
 
     const char          *GetName() override { return pszName; }
     int                 GetLayerCount() override { return nLayers; }
@@ -147,23 +147,9 @@ class OGRGRASSDataSource final: public OGRDataSource
     struct Map_info     map;
     int                 nLayers;
 
-    int                 bOpened;
+    bool                bOpened;
 
     static bool SplitPath ( char *, char **, char **, char **, char ** );
-};
-
-/************************************************************************/
-/*                            OGRGRASSDriver                            */
-/************************************************************************/
-class OGRGRASSDriver final: public OGRSFDriver
-{
-  public:
-                        virtual ~OGRGRASSDriver();
-
-    const char          *GetName() override;
-    OGRDataSource       *Open( const char *, int ) override;
-
-    int                 TestCapability( const char * ) override;
 };
 
 #endif /* ndef OGRGRASS_H_INCLUDED */
