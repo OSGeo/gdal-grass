@@ -37,45 +37,23 @@ extern "C" {
 CPL_CVSID("$Id$")
 
 /************************************************************************/
-/*                          ~OGRGRASSDriver()                           */
-/************************************************************************/
-OGRGRASSDriver::~OGRGRASSDriver()
-{
-}
-
-/************************************************************************/
-/*                              GetName()                               */
-/************************************************************************/
-const char *OGRGRASSDriver::GetName()
-{
-    return "OGR_GRASS";
-}
-
-/************************************************************************/
 /*                                Open()                                */
 /************************************************************************/
-OGRDataSource *OGRGRASSDriver::Open( const char * pszFilename,
-                                     int bUpdate )
+static auto GRASSDatasetOpen(GDALOpenInfo *poOpenInfo) -> GDALDataset*
 {
-    OGRGRASSDataSource  *poDS = new OGRGRASSDataSource();
+    auto *poDS = new OGRGRASSDataSource();
 
-    if( !poDS->Open( pszFilename, bUpdate, TRUE ) )
+    bool bUpdate = poOpenInfo->eAccess == GA_Update;
+
+    if( !poDS->Open( poOpenInfo->pszFilename, bUpdate, true ))
     {
         delete poDS;
-        return NULL;
+        return nullptr;
     }
     else
     {
         return poDS;
     }
-}
-
-/************************************************************************/
-/*                           TestCapability()                           */
-/************************************************************************/
-int OGRGRASSDriver::TestCapability( const char * /*pszCap*/ )
-{
-    return FALSE;
 }
 
 /************************************************************************/
@@ -86,15 +64,17 @@ void RegisterOGRGRASS()
     if (! GDAL_CHECK_VERSION("OGR/GRASS driver"))
         return;
 
-    if( GDALGetDriverByName( "OGR_GRASS" ) != NULL )
+    if( GDALGetDriverByName( "OGR_GRASS" ) != nullptr )
         return;
 
-    OGRGRASSDriver *poDriver = new OGRGRASSDriver();
+    auto *poDriver = new GDALDriver();
 
-    poDriver->SetDescription( "GRASS" );
+    poDriver->SetDescription( "OGR_GRASS" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GRASS Vectors (5.7+)" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/grass.html" );
+
+    poDriver->pfnOpen = GRASSDatasetOpen;
 
     GetGDALDriverManager()->RegisterDriver(poDriver);
 }

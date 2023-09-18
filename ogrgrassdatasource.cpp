@@ -87,8 +87,8 @@ OGRGRASSDataSource::~OGRGRASSDataSource()
 
 typedef int (*GrassErrorHandler)(const char *, int);
 
-int OGRGRASSDataSource::Open( const char * pszNewName, int /*bUpdate*/,
-                              int bTestOpen, int /*bSingleNewFileIn*/ )
+bool OGRGRASSDataSource::Open( const char * pszNewName, bool /*bUpdate*/,
+                               bool bTestOpen, bool /*bSingleNewFileIn*/ )
 {
     VSIStatBuf  stat;
 
@@ -99,14 +99,14 @@ int OGRGRASSDataSource::Open( const char * pszNewName, int /*bUpdate*/,
 /* -------------------------------------------------------------------- */
 /*      Do the given path contains 'vector' and 'head'?                 */
 /* -------------------------------------------------------------------- */
-    if ( strstr(pszName,"vector") == NULL || strstr(pszName,"head") == NULL )
+    if ( strstr(pszName,"vector") == nullptr || strstr(pszName,"head") == nullptr )
     {
         if( !bTestOpen )
         {
             CPLError( CE_Failure, CPLE_AppDefined,
                  "%s is not GRASS vector, access failed.\n", pszName );
         }
-        return FALSE;
+        return false;
     }
 
 /* -------------------------------------------------------------------- */
@@ -120,7 +120,7 @@ int OGRGRASSDataSource::Open( const char * pszNewName, int /*bUpdate*/,
                  "%s is not GRASS vector, access failed.\n", pszName );
         }
 
-        return FALSE;
+        return false;
     }
 
 /* -------------------------------------------------------------------- */
@@ -135,7 +135,7 @@ int OGRGRASSDataSource::Open( const char * pszNewName, int /*bUpdate*/,
                       "%s is not GRASS datasource name, access failed.\n",
                       pszName );
         }
-        return FALSE;
+        return false;
     }
 
     CPLDebug ( "GRASS", "Gisdbase: %s", pszGisdbase );
@@ -149,7 +149,7 @@ int OGRGRASSDataSource::Open( const char * pszNewName, int /*bUpdate*/,
     // GISBASE is path to the directory where GRASS is installed,
     // it is necessary because there are database drivers.
     if ( !getenv( "GISBASE" ) ) {
-        static char* gisbaseEnv = NULL;
+        static char* gisbaseEnv = nullptr;
         const char *gisbase = GRASS_GISBASE;
         CPLError( CE_Warning, CPLE_AppDefined, "GRASS warning: GISBASE "
                 "environment variable was not set, using:\n%s", gisbase );
@@ -191,7 +191,7 @@ int OGRGRASSDataSource::Open( const char * pszNewName, int /*bUpdate*/,
     if ( level < 2 ) {
         CPLError( CE_Failure, CPLE_AppDefined,
                  "Cannot open GRASS vector %s on level 2.\n", pszName );
-        return FALSE;
+        return false;
     }
 
     CPLDebug ( "GRASS", "Num lines = %d", Vect_get_num_lines(&map) );
@@ -212,9 +212,9 @@ int OGRGRASSDataSource::Open( const char * pszNewName, int /*bUpdate*/,
         papoLayers[nLayers++] = poLayer;
     }
 
-    bOpened = TRUE;
+    bOpened = true;
 
-    return TRUE;
+    return true;
 }
 
 /************************************************************************/
