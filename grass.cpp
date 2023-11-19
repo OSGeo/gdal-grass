@@ -8,7 +8,7 @@
  *           Radim Blazek <blazek@itc.it>
  *
  ******************************************************************************
- * Copyright (c) 2000 Frank Warmerdam <warmerdam@pobox.com>
+ * Copyright (c) 2000 Frank Warmerdam <warmerdam@pobox.com>.  
  * Copyright (c) 2007-2020, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
