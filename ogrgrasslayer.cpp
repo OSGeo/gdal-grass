@@ -36,9 +36,10 @@ CPL_CVSID("$Id$")
 /************************************************************************/
 /*                           OGRGRASSLayer()                            */
 /************************************************************************/
-OGRGRASSLayer::OGRGRASSLayer( int layerIndex,  struct Map_info * map )
+OGRGRASSLayer::OGRGRASSLayer(int layerIndex, struct Map_info *map)
 {
-    CPLDebug ( "GRASS", "OGRGRASSLayer::OGRGRASSLayer layerIndex = %d", layerIndex );
+    CPLDebug("GRASS", "OGRGRASSLayer::OGRGRASSLayer layerIndex = %d",
+             layerIndex);
 
     iLayerIndex = layerIndex;
     poMap = map;
@@ -51,154 +52,164 @@ OGRGRASSLayer::OGRGRASSLayer( int layerIndex,  struct Map_info * map )
     paSpatialMatch = NULL;
     iCurrentCat = 0;
 
-    iLayer = Vect_cidx_get_field_number ( poMap, iLayerIndex);
-    CPLDebug ( "GRASS", "iLayer = %d", iLayer );
+    iLayer = Vect_cidx_get_field_number(poMap, iLayerIndex);
+    CPLDebug("GRASS", "iLayer = %d", iLayer);
 
-    poLink = Vect_get_field ( poMap, iLayer ); // May be NULL if not defined
+    poLink = Vect_get_field(poMap, iLayer);  // May be NULL if not defined
 
     // Layer name
-    if ( poLink && poLink->name )
+    if (poLink && poLink->name)
     {
-        pszName = CPLStrdup( poLink->name );
+        pszName = CPLStrdup(poLink->name);
     }
     else
     {
         char buf[20];
-        snprintf ( buf, sizeof(buf), "%d", iLayer );
-        pszName = CPLStrdup( buf );
+        snprintf(buf, sizeof(buf), "%d", iLayer);
+        pszName = CPLStrdup(buf);
     }
 
     // Because we don't represent centroids as any simple feature, we have to scan
     // category index and create index of feature IDs pointing to category index
-    nTotalCount = Vect_cidx_get_type_count(poMap,iLayer, GV_POINT|GV_LINES|GV_AREA);
-    CPLDebug ( "GRASS", "nTotalCount = %d", nTotalCount );
-    paFeatureIndex = (int *) CPLMalloc ( nTotalCount * sizeof(int) );
+    nTotalCount =
+        Vect_cidx_get_type_count(poMap, iLayer, GV_POINT | GV_LINES | GV_AREA);
+    CPLDebug("GRASS", "nTotalCount = %d", nTotalCount);
+    paFeatureIndex = (int *)CPLMalloc(nTotalCount * sizeof(int));
 
-    int n = Vect_cidx_get_type_count(poMap,iLayer, GV_POINTS|GV_LINES|GV_AREA);
+    int n =
+        Vect_cidx_get_type_count(poMap, iLayer, GV_POINTS | GV_LINES | GV_AREA);
     int cnt = 0;
-    for ( int i = 0; i < n; i++ )
+    for (int i = 0; i < n; i++)
     {
-        int cat,type, id;
+        int cat, type, id;
 
-        Vect_cidx_get_cat_by_index ( poMap, iLayerIndex, i, &cat, &type, &id );
+        Vect_cidx_get_cat_by_index(poMap, iLayerIndex, i, &cat, &type, &id);
 
-        if ( !( type & (GV_POINT|GV_LINES|GV_AREA) ) ) continue;
+        if (!(type & (GV_POINT | GV_LINES | GV_AREA)))
+            continue;
         paFeatureIndex[cnt++] = i;
     }
 
-    poFeatureDefn = new OGRFeatureDefn( pszName );
-    SetDescription( poFeatureDefn->GetName() );
+    poFeatureDefn = new OGRFeatureDefn(pszName);
+    SetDescription(poFeatureDefn->GetName());
     poFeatureDefn->Reference();
 
     // Get type definition
-    int nTypes = Vect_cidx_get_num_types_by_index ( poMap, iLayerIndex );
+    int nTypes = Vect_cidx_get_num_types_by_index(poMap, iLayerIndex);
     int types = 0;
-    for ( int i = 0; i < nTypes; i++ ) {
+    for (int i = 0; i < nTypes; i++)
+    {
         int type, count;
-        Vect_cidx_get_type_count_by_index ( poMap, iLayerIndex, i, &type, &count);
-        if ( !(type & (GV_POINT|GV_LINES|GV_AREA) ) ) continue;
+        Vect_cidx_get_type_count_by_index(poMap, iLayerIndex, i, &type, &count);
+        if (!(type & (GV_POINT | GV_LINES | GV_AREA)))
+            continue;
         types |= type;
-        CPLDebug ( "GRASS", "type = %d types = %d", type, types );
+        CPLDebug("GRASS", "type = %d types = %d", type, types);
     }
 
     OGRwkbGeometryType eGeomType = wkbUnknown;
-    if ( types == GV_LINE || types == GV_BOUNDARY || types == GV_LINES )
+    if (types == GV_LINE || types == GV_BOUNDARY || types == GV_LINES)
     {
         eGeomType = wkbLineString;
     }
-    else if ( types == GV_POINT )
+    else if (types == GV_POINT)
     {
         eGeomType = wkbPoint;
     }
-    else if ( types == GV_AREA )
+    else if (types == GV_AREA)
     {
-        CPLDebug ( "GRASS", "set wkbPolygon" );
+        CPLDebug("GRASS", "set wkbPolygon");
         eGeomType = wkbPolygon;
     }
 
     if (Vect_is_3d(poMap))
-        poFeatureDefn->SetGeomType ( wkbSetZ(eGeomType) );
+        poFeatureDefn->SetGeomType(wkbSetZ(eGeomType));
     else
-        poFeatureDefn->SetGeomType ( eGeomType );
+        poFeatureDefn->SetGeomType(eGeomType);
 
     // Get attributes definition
-    poDbString = (dbString*) CPLMalloc ( sizeof(dbString) );
-    poCursor = (dbCursor*) CPLMalloc ( sizeof(dbCursor) );
+    poDbString = (dbString *)CPLMalloc(sizeof(dbString));
+    poCursor = (dbCursor *)CPLMalloc(sizeof(dbCursor));
     bCursorOpened = FALSE;
 
     poDriver = NULL;
     bHaveAttributes = false;
-    db_init_string ( poDbString );
-    if ( poLink )
+    db_init_string(poDbString);
+    if (poLink)
     {
-        if ( StartDbDriver() )
+        if (StartDbDriver())
         {
-            db_set_string ( poDbString, poLink->table );
+            db_set_string(poDbString, poLink->table);
             dbTable *table = NULL;
-            if ( db_describe_table ( poDriver, poDbString, &table) == DB_OK )
+            if (db_describe_table(poDriver, poDbString, &table) == DB_OK)
             {
-                nFields = db_get_table_number_of_columns ( table );
+                nFields = db_get_table_number_of_columns(table);
                 iCatField = -1;
-                for ( int i = 0; i < nFields; i++)
+                for (int i = 0; i < nFields; i++)
                 {
-                    dbColumn *column = db_get_table_column ( table, i );
-                    int ctype = db_sqltype_to_Ctype ( db_get_column_sqltype(column) );
+                    dbColumn *column = db_get_table_column(table, i);
+                    int ctype =
+                        db_sqltype_to_Ctype(db_get_column_sqltype(column));
 
                     OGRFieldType ogrFtype = OFTInteger;
-                    switch ( ctype ) {
-                         case DB_C_TYPE_INT:
+                    switch (ctype)
+                    {
+                        case DB_C_TYPE_INT:
                             ogrFtype = OFTInteger;
                             break;
-                         case DB_C_TYPE_DOUBLE:
+                        case DB_C_TYPE_DOUBLE:
                             ogrFtype = OFTReal;
                             break;
-                         case DB_C_TYPE_STRING:
+                        case DB_C_TYPE_STRING:
                             ogrFtype = OFTString;
                             break;
-                         case DB_C_TYPE_DATETIME:
+                        case DB_C_TYPE_DATETIME:
                             ogrFtype = OFTDateTime;
                             break;
                     }
 
-                    CPLDebug ( "GRASS", "column = %s type = %d",
-                               db_get_column_name(column), ctype );
+                    CPLDebug("GRASS", "column = %s type = %d",
+                             db_get_column_name(column), ctype);
 
-                    OGRFieldDefn oField ( db_get_column_name(column), ogrFtype );
-                    poFeatureDefn->AddFieldDefn( &oField );
+                    OGRFieldDefn oField(db_get_column_name(column), ogrFtype);
+                    poFeatureDefn->AddFieldDefn(&oField);
 
-                    if ( G_strcasecmp(db_get_column_name(column),poLink->key) == 0 )
+                    if (G_strcasecmp(db_get_column_name(column), poLink->key) ==
+                        0)
                     {
                         iCatField = i;
                     }
                 }
-                if ( iCatField >= 0  )
+                if (iCatField >= 0)
                 {
                     bHaveAttributes = true;
                 }
                 else
                 {
-                    CPLError( CE_Failure, CPLE_AppDefined, "Cannot find key field" );
-                    db_close_database_shutdown_driver ( poDriver );
+                    CPLError(CE_Failure, CPLE_AppDefined,
+                             "Cannot find key field");
+                    db_close_database_shutdown_driver(poDriver);
                     poDriver = NULL;
                 }
             }
             else
             {
-                CPLError( CE_Failure, CPLE_AppDefined, "Cannot describe table %s",
-                          poLink->table );
+                CPLError(CE_Failure, CPLE_AppDefined,
+                         "Cannot describe table %s", poLink->table);
             }
-            db_close_database_shutdown_driver ( poDriver );
+            db_close_database_shutdown_driver(poDriver);
             poDriver = NULL;
         }
     }
 
-    if ( !bHaveAttributes && iLayer > 0 ) // Because features in layer 0 have no cats
+    if (!bHaveAttributes &&
+        iLayer > 0)  // Because features in layer 0 have no cats
     {
         OGRFieldDefn oField("cat", OFTInteger);
-        poFeatureDefn->AddFieldDefn( &oField );
+        poFeatureDefn->AddFieldDefn(&oField);
     }
 
-    if ( getenv("GISBASE") )  // We have some projection info in GISBASE
+    if (getenv("GISBASE"))  // We have some projection info in GISBASE
     {
         struct Key_Value *projinfo, *projunits;
 
@@ -209,12 +220,12 @@ OGRGRASSLayer::OGRGRASSLayer( int layerIndex,  struct Map_info * map )
         projinfo = G_get_projinfo();
         projunits = G_get_projunits();
 
-        char *srsWkt = GPJ_grass_to_wkt ( projinfo, projunits, 0, 0);
-        if ( srsWkt )
+        char *srsWkt = GPJ_grass_to_wkt(projinfo, projunits, 0, 0);
+        if (srsWkt)
         {
-            poSRS = new OGRSpatialReference ( srsWkt );
+            poSRS = new OGRSpatialReference(srsWkt);
             poSRS->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
-            G_free ( srsWkt );
+            G_free(srsWkt);
         }
 
         G_free_key_value(projinfo);
@@ -227,37 +238,43 @@ OGRGRASSLayer::OGRGRASSLayer( int layerIndex,  struct Map_info * map )
 /************************************************************************/
 OGRGRASSLayer::~OGRGRASSLayer()
 {
-    if ( bCursorOpened )
+    if (bCursorOpened)
     {
-        db_close_cursor ( poCursor);
+        db_close_cursor(poCursor);
     }
 
-    if ( poDriver )
+    if (poDriver)
     {
         StopDbDriver();
     }
 
-    if ( pszName ) CPLFree ( pszName );
-    if ( poFeatureDefn )
+    if (pszName)
+        CPLFree(pszName);
+    if (poFeatureDefn)
         poFeatureDefn->Release();
-    if ( poSRS )
+    if (poSRS)
         poSRS->Release();
 
-    if ( pszQuery ) CPLFree ( pszQuery );
+    if (pszQuery)
+        CPLFree(pszQuery);
 
-    if ( paFeatureIndex ) CPLFree ( paFeatureIndex );
+    if (paFeatureIndex)
+        CPLFree(paFeatureIndex);
 
-    if ( poLink ) G_free ( poLink );
+    if (poLink)
+        G_free(poLink);
 
-    Vect_destroy_line_struct ( poPoints );
-    Vect_destroy_cats_struct ( poCats );
+    Vect_destroy_line_struct(poPoints);
+    Vect_destroy_cats_struct(poCats);
 
-    db_free_string ( poDbString );
-    CPLFree ( poDbString );
-    CPLFree ( poCursor );
+    db_free_string(poDbString);
+    CPLFree(poDbString);
+    CPLFree(poCursor);
 
-    if ( paSpatialMatch ) CPLFree ( paSpatialMatch );
-    if ( paQueryMatch ) CPLFree ( paQueryMatch );
+    if (paSpatialMatch)
+        CPLFree(paSpatialMatch);
+    if (paQueryMatch)
+        CPLFree(paQueryMatch);
 }
 
 /************************************************************************/
@@ -265,21 +282,24 @@ OGRGRASSLayer::~OGRGRASSLayer()
 /************************************************************************/
 bool OGRGRASSLayer::StartDbDriver()
 {
-    CPLDebug ( "GRASS", "StartDbDriver()" );
+    CPLDebug("GRASS", "StartDbDriver()");
 
     bCursorOpened = false;
 
-    if ( !poLink )
+    if (!poLink)
     {
         return false;
     }
-    poDriver = db_start_driver_open_database ( poLink->driver, poLink->database );
+    poDriver = db_start_driver_open_database(poLink->driver, poLink->database);
 
-    if ( poDriver == NULL)
+    if (poDriver == NULL)
     {
-        CPLError( CE_Failure, CPLE_AppDefined, "Cannot open database %s by driver %s, "
-                  "check if GISBASE environment variable is set, the driver is available "
-                  " and the database is accessible.", poLink->driver, poLink->database );
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "Cannot open database %s by driver %s, "
+                 "check if GISBASE environment variable is set, the driver is "
+                 "available "
+                 " and the database is accessible.",
+                 poLink->driver, poLink->database);
         return false;
     }
     return true;
@@ -290,26 +310,28 @@ bool OGRGRASSLayer::StartDbDriver()
 /************************************************************************/
 bool OGRGRASSLayer::StopDbDriver()
 {
-    if ( !poDriver )
+    if (!poDriver)
     {
-        CPLError( CE_Failure, CPLE_AppDefined, "Driver is not started" );
-        return true; // I think that true is OK here
+        CPLError(CE_Failure, CPLE_AppDefined, "Driver is not started");
+        return true;  // I think that true is OK here
     }
 
     // TODO!!!: Because of bug in GRASS library it is impossible
     // to stop drivers in FIFO order. Until this is fixed
     // we have to use kill
-    CPLDebug ( "GRASS", "driver PID = %d", poDriver->pid );
+    CPLDebug("GRASS", "driver PID = %d", poDriver->pid);
 
 #if defined(_WIN32) || defined(__WIN32__)
-    db_close_database_shutdown_driver ( poDriver );
+    db_close_database_shutdown_driver(poDriver);
 #else
-    if ( kill (poDriver->pid, SIGINT) != 0 )
+    if (kill(poDriver->pid, SIGINT) != 0)
     {
-        if ( kill (poDriver->pid, SIGKILL) != 0 )
+        if (kill(poDriver->pid, SIGKILL) != 0)
         {
-            CPLError( CE_Failure, CPLE_AppDefined, "Cannot stop database "
-                      "driver pid = %d", poDriver->pid );
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Cannot stop database "
+                     "driver pid = %d",
+                     poDriver->pid);
         }
     }
 #endif
@@ -326,7 +348,8 @@ void OGRGRASSLayer::ResetReading()
 {
     iNextId = 0;
 
-    if ( bCursorOpened ) {
+    if (bCursorOpened)
+    {
         ResetSequentialCursor();
     }
 }
@@ -337,25 +360,30 @@ void OGRGRASSLayer::ResetReading()
 /*      If we already have an FID list, we can easily reposition        */
 /*      ourselves in it.                                                */
 /************************************************************************/
-OGRErr OGRGRASSLayer::SetNextByIndex( GIntBig nIndex )
+OGRErr OGRGRASSLayer::SetNextByIndex(GIntBig nIndex)
 {
-    if( m_poFilterGeom != NULL || m_poAttrQuery != NULL )
+    if (m_poFilterGeom != NULL || m_poAttrQuery != NULL)
     {
         iNextId = 0;
         int count = 0;
 
-        while ( true ) {
-            if( iNextId >= nTotalCount ) break;
-            if ( count == nIndex ) break;
+        while (true)
+        {
+            if (iNextId >= nTotalCount)
+                break;
+            if (count == nIndex)
+                break;
 
             // Attributes
-            if( pszQuery != NULL && !paQueryMatch[iNextId] ) {
+            if (pszQuery != NULL && !paQueryMatch[iNextId])
+            {
                 iNextId++;
                 continue;
             }
 
             // Spatial
-            if( m_poFilterGeom && !paSpatialMatch[iNextId] ) {
+            if (m_poFilterGeom && !paSpatialMatch[iNextId])
+            {
                 iNextId++;
                 continue;
             }
@@ -371,62 +399,66 @@ OGRErr OGRGRASSLayer::SetNextByIndex( GIntBig nIndex )
 /************************************************************************/
 /*                           SetAttributeFilter                         */
 /************************************************************************/
-OGRErr OGRGRASSLayer::SetAttributeFilter( const char *query )
+OGRErr OGRGRASSLayer::SetAttributeFilter(const char *query)
 {
-    CPLDebug ( "GRASS", "SetAttributeFilter: %s", query  );
+    CPLDebug("GRASS", "SetAttributeFilter: %s", query);
 
-    if ( query == NULL ) {
+    if (query == NULL)
+    {
         // Release old if any
-        if ( pszQuery ) {
-            CPLFree ( pszQuery );
+        if (pszQuery)
+        {
+            CPLFree(pszQuery);
             pszQuery = NULL;
         }
-        if ( paQueryMatch ) {
-            CPLFree ( paQueryMatch );
+        if (paQueryMatch)
+        {
+            CPLFree(paQueryMatch);
             paQueryMatch = NULL;
         }
         return OGRERR_NONE;
     }
 
-    paQueryMatch = (char *) CPLMalloc ( nTotalCount );
-    memset ( paQueryMatch, 0x0, nTotalCount );
+    paQueryMatch = (char *)CPLMalloc(nTotalCount);
+    memset(paQueryMatch, 0x0, nTotalCount);
     pszQuery = CPLStrdup(query);
 
-    OGRLayer::SetAttributeFilter(query); // Otherwise crash on delete
+    OGRLayer::SetAttributeFilter(query);  // Otherwise crash on delete
 
-    if ( bHaveAttributes ) {
+    if (bHaveAttributes)
+    {
 
-        if ( !poDriver )
+        if (!poDriver)
         {
             StartDbDriver();
         }
 
-        if ( poDriver )
+        if (poDriver)
         {
-            if ( bCursorOpened )
+            if (bCursorOpened)
             {
-                db_close_cursor ( poCursor );
+                db_close_cursor(poCursor);
                 bCursorOpened = false;
             }
             OpenSequentialCursor();
-            if ( bCursorOpened )
+            if (bCursorOpened)
             {
                 SetQueryMatch();
-                db_close_cursor ( poCursor );
+                db_close_cursor(poCursor);
                 bCursorOpened = false;
             }
             else
             {
-                CPLFree ( pszQuery );
+                CPLFree(pszQuery);
                 pszQuery = NULL;
                 return OGRERR_FAILURE;
             }
-            db_close_database_shutdown_driver ( poDriver );
+            db_close_database_shutdown_driver(poDriver);
             poDriver = NULL;
         }
         else
         {
-            CPLFree ( pszQuery );
+            CPLFree(pszQuery);
             pszQuery = NULL;
             return OGRERR_FAILURE;
         }
@@ -434,11 +466,12 @@ OGRErr OGRGRASSLayer::SetAttributeFilter( const char *query )
     else
     {
         // Use OGR to evaluate category match
-        for ( int i = 0; i < nTotalCount; i++ )
+        for (int i = 0; i < nTotalCount; i++)
         {
             OGRFeature *feature = GetFeature(i);
-            CPLDebug ( "GRASS", "i = %d eval = %d", i, m_poAttrQuery->Evaluate ( feature ) );
-            if ( m_poAttrQuery->Evaluate ( feature ) )
+            CPLDebug("GRASS", "i = %d eval = %d", i,
+                     m_poAttrQuery->Evaluate(feature));
+            if (m_poAttrQuery->Evaluate(feature))
             {
                 paQueryMatch[i] = 1;
             }
@@ -453,33 +486,36 @@ OGRErr OGRGRASSLayer::SetAttributeFilter( const char *query )
 /************************************************************************/
 bool OGRGRASSLayer::SetQueryMatch()
 {
-    CPLDebug ( "GRASS", "SetQueryMatch" );
+    CPLDebug("GRASS", "SetQueryMatch");
 
     // NOTE: we don't have to call ResetSequentialCursor() first because
     // this method is called immediately after OpenSequentialCursor()
 
-    if ( !bCursorOpened ) {
-        CPLError( CE_Failure, CPLE_AppDefined, "Cursor is not opened.");
+    if (!bCursorOpened)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "Cursor is not opened.");
         return false;
     }
 
     int more;
-    int cidx = 0; // index to category index
-    int fidx = 0; // index to feature index (paFeatureIndex)
+    int cidx = 0;  // index to category index
+    int fidx = 0;  // index to feature index (paFeatureIndex)
     // number of categories in category index
-    int ncats = Vect_cidx_get_num_cats_by_index ( poMap, iLayerIndex );
-    dbTable *table = db_get_cursor_table ( poCursor );
-    while ( true ) {
-        if( db_fetch ( poCursor, DB_NEXT, &more) != DB_OK )
+    int ncats = Vect_cidx_get_num_cats_by_index(poMap, iLayerIndex);
+    dbTable *table = db_get_cursor_table(poCursor);
+    while (true)
+    {
+        if (db_fetch(poCursor, DB_NEXT, &more) != DB_OK)
         {
-            CPLError( CE_Failure, CPLE_AppDefined, "Cannot fetch attributes.");
+            CPLError(CE_Failure, CPLE_AppDefined, "Cannot fetch attributes.");
             return false;
         }
-        if ( !more ) break;
+        if (!more)
+            break;
 
-        dbColumn *column = db_get_table_column ( table, iCatField );
-        dbValue *value = db_get_column_value ( column );
-        int cat = db_get_value_int ( value );
+        dbColumn *column = db_get_table_column(table, iCatField);
+        dbValue *value = db_get_column_value(column);
+        int cat = db_get_value_int(value);
 
         // NOTE: because of bug in GRASS library it is impossible to use
         //       Vect_cidx_find_next
@@ -487,33 +523,39 @@ bool OGRGRASSLayer::SetQueryMatch()
         // Go through category index until first record of current category
         // is found or a category > current is found
         int id = -1;
-        while ( cidx < ncats ) {
+        while (cidx < ncats)
+        {
             int cidxcat = 0;
             int type = 0;
-            Vect_cidx_get_cat_by_index ( poMap, iLayerIndex, cidx,
-                                         &cidxcat, &type, &id );
+            Vect_cidx_get_cat_by_index(poMap, iLayerIndex, cidx, &cidxcat,
+                                       &type, &id);
 
-            if ( cidxcat < cat ) {
+            if (cidxcat < cat)
+            {
                 cidx++;
                 continue;
             }
-            if ( cidxcat > cat ) break; // Not found
+            if (cidxcat > cat)
+                break;  // Not found
 
             // We have the category we want, check type
-            if ( !(type & (GV_POINT|GV_LINES|GV_AREA)) )
+            if (!(type & (GV_POINT | GV_LINES | GV_AREA)))
             {
                 cidx++;
                 continue;
             }
 
             // Both category and type match -> find feature and set it on
-            while ( true ) {
-                if ( fidx > nTotalCount || paFeatureIndex[fidx] > cidx ) {
+            while (true)
+            {
+                if (fidx > nTotalCount || paFeatureIndex[fidx] > cidx)
+                {
                     // should not happen
                     break;
                 }
 
-                if ( paFeatureIndex[fidx] == cidx ) {
+                if (paFeatureIndex[fidx] == cidx)
+                {
                     paQueryMatch[fidx] = 1;
                     fidx++;
                     break;
@@ -523,7 +565,8 @@ bool OGRGRASSLayer::SetQueryMatch()
             cidx++;
         }
 
-        if ( id < 0 ) continue; // not found
+        if (id < 0)
+            continue;  // not found
     }
 
     return true;
@@ -534,44 +577,45 @@ bool OGRGRASSLayer::SetQueryMatch()
 /************************************************************************/
 bool OGRGRASSLayer::OpenSequentialCursor()
 {
-    CPLDebug ( "GRASS", "OpenSequentialCursor: %s", pszQuery  );
+    CPLDebug("GRASS", "OpenSequentialCursor: %s", pszQuery);
 
-    if ( !poDriver )
+    if (!poDriver)
     {
-        CPLError( CE_Failure, CPLE_AppDefined, "Driver not opened.");
+        CPLError(CE_Failure, CPLE_AppDefined, "Driver not opened.");
         return false;
     }
 
-    if ( bCursorOpened )
+    if (bCursorOpened)
     {
-        db_close_cursor ( poCursor );
+        db_close_cursor(poCursor);
         bCursorOpened = false;
     }
 
     char buf[2000];
-    snprintf ( buf, sizeof(buf), "SELECT * FROM %s ", poLink->table );
-    db_set_string ( poDbString, buf);
+    snprintf(buf, sizeof(buf), "SELECT * FROM %s ", poLink->table);
+    db_set_string(poDbString, buf);
 
-    if ( pszQuery ) {
-        snprintf ( buf, sizeof(buf), "WHERE %s ", pszQuery );
-        db_append_string ( poDbString, buf);
+    if (pszQuery)
+    {
+        snprintf(buf, sizeof(buf), "WHERE %s ", pszQuery);
+        db_append_string(poDbString, buf);
     }
 
-    snprintf ( buf, sizeof(buf), "ORDER BY %s", poLink->key);
-    db_append_string ( poDbString, buf);
+    snprintf(buf, sizeof(buf), "ORDER BY %s", poLink->key);
+    db_append_string(poDbString, buf);
 
-    CPLDebug ( "GRASS", "Query: %s", db_get_string(poDbString) );
+    CPLDebug("GRASS", "Query: %s", db_get_string(poDbString));
 
-    if ( db_open_select_cursor ( poDriver, poDbString,
-                poCursor, DB_SCROLL) == DB_OK )
+    if (db_open_select_cursor(poDriver, poDbString, poCursor, DB_SCROLL) ==
+        DB_OK)
     {
         iCurrentCat = -1;
         bCursorOpened = true;
-        CPLDebug ( "GRASS", "num rows = %d", db_get_num_rows ( poCursor ) );
+        CPLDebug("GRASS", "num rows = %d", db_get_num_rows(poCursor));
     }
     else
     {
-        CPLError( CE_Failure, CPLE_AppDefined, "Cannot open cursor.");
+        CPLError(CE_Failure, CPLE_AppDefined, "Cannot open cursor.");
         return false;
     }
     return true;
@@ -582,17 +626,17 @@ bool OGRGRASSLayer::OpenSequentialCursor()
 /************************************************************************/
 bool OGRGRASSLayer::ResetSequentialCursor()
 {
-    CPLDebug ( "GRASS", "ResetSequentialCursor" );
+    CPLDebug("GRASS", "ResetSequentialCursor");
 
     int more;
-    if( db_fetch ( poCursor, DB_FIRST, &more) != DB_OK )
+    if (db_fetch(poCursor, DB_FIRST, &more) != DB_OK)
     {
-        CPLError( CE_Failure, CPLE_AppDefined, "Cannot reset cursor.");
+        CPLError(CE_Failure, CPLE_AppDefined, "Cannot reset cursor.");
         return false;
     }
-    if( db_fetch ( poCursor, DB_PREVIOUS, &more) != DB_OK )
+    if (db_fetch(poCursor, DB_PREVIOUS, &more) != DB_OK)
     {
-        CPLError( CE_Failure, CPLE_AppDefined, "Cannot reset cursor.");
+        CPLError(CE_Failure, CPLE_AppDefined, "Cannot reset cursor.");
         return false;
     }
     return true;
@@ -601,16 +645,18 @@ bool OGRGRASSLayer::ResetSequentialCursor()
 /************************************************************************/
 /*                           SetSpatialFilter                           */
 /************************************************************************/
-void OGRGRASSLayer::SetSpatialFilter( OGRGeometry * poGeomIn )
+void OGRGRASSLayer::SetSpatialFilter(OGRGeometry *poGeomIn)
 {
-    CPLDebug ( "GRASS", "SetSpatialFilter" );
+    CPLDebug("GRASS", "SetSpatialFilter");
 
-    OGRLayer::SetSpatialFilter ( poGeomIn );
+    OGRLayer::SetSpatialFilter(poGeomIn);
 
-    if ( poGeomIn == NULL ) {
+    if (poGeomIn == NULL)
+    {
         // Release old if any
-        if ( paSpatialMatch ) {
-            CPLFree ( paSpatialMatch );
+        if (paSpatialMatch)
+        {
+            CPLFree(paSpatialMatch);
             paSpatialMatch = NULL;
         }
         return;
@@ -624,48 +670,50 @@ void OGRGRASSLayer::SetSpatialFilter( OGRGeometry * poGeomIn )
 /************************************************************************/
 bool OGRGRASSLayer::SetSpatialMatch()
 {
-    CPLDebug ( "GRASS", "SetSpatialMatch" );
+    CPLDebug("GRASS", "SetSpatialMatch");
 
-    if ( !paSpatialMatch )
+    if (!paSpatialMatch)
     {
-        paSpatialMatch = (char *) CPLMalloc ( nTotalCount );
+        paSpatialMatch = (char *)CPLMalloc(nTotalCount);
     }
-    memset ( paSpatialMatch, 0x0, nTotalCount );
+    memset(paSpatialMatch, 0x0, nTotalCount);
 
     OGRLineString *lstring = new OGRLineString();
-    lstring->setNumPoints ( 5 );
+    lstring->setNumPoints(5);
     OGRGeometry *geom = lstring;
 
-    for ( int i = 0; i < nTotalCount; i++ ) {
+    for (int i = 0; i < nTotalCount; i++)
+    {
         int cidx = paFeatureIndex[i];
 
         int cat, type, id;
 
-        Vect_cidx_get_cat_by_index ( poMap, iLayerIndex, cidx, &cat, &type, &id );
+        Vect_cidx_get_cat_by_index(poMap, iLayerIndex, cidx, &cat, &type, &id);
 
         struct bound_box box;
 
-        switch ( type )
+        switch (type)
         {
             case GV_POINT:
             case GV_LINE:
             case GV_BOUNDARY:
-                Vect_get_line_box ( poMap, id, &box );
+                Vect_get_line_box(poMap, id, &box);
                 break;
 
             case GV_AREA:
-                Vect_get_area_box ( poMap, id, &box );
+                Vect_get_area_box(poMap, id, &box);
                 break;
         }
 
-        lstring->setPoint( 0, box.W, box.N, 0. );
-        lstring->setPoint( 1, box.W, box.S, 0. );
-        lstring->setPoint( 2, box.E, box.S, 0. );
-        lstring->setPoint( 3, box.E, box.N, 0. );
-        lstring->setPoint( 4, box.W, box.N, 0. );
+        lstring->setPoint(0, box.W, box.N, 0.);
+        lstring->setPoint(1, box.W, box.S, 0.);
+        lstring->setPoint(2, box.E, box.S, 0.);
+        lstring->setPoint(3, box.E, box.N, 0.);
+        lstring->setPoint(4, box.W, box.N, 0.);
 
-        if ( FilterGeometry(geom) ) {
-            CPLDebug ( "GRASS", "Feature %d in filter", i );
+        if (FilterGeometry(geom))
+        {
+            CPLDebug("GRASS", "Feature %d in filter", i);
             paSpatialMatch[i] = 1;
         }
     }
@@ -678,24 +726,25 @@ bool OGRGRASSLayer::SetSpatialMatch()
 /************************************************************************/
 OGRFeature *OGRGRASSLayer::GetNextFeature()
 {
-    CPLDebug ( "GRASS", "OGRGRASSLayer::GetNextFeature" );
-    OGRFeature  *poFeature = NULL;
+    CPLDebug("GRASS", "OGRGRASSLayer::GetNextFeature");
+    OGRFeature *poFeature = NULL;
 
     int cat;
 
     // Get next iNextId
-    while ( true ) {
-        if( iNextId >= nTotalCount ) // No more features
+    while (true)
+    {
+        if (iNextId >= nTotalCount)  // No more features
         {
             // Close cursor / driver if opened
-            if ( bCursorOpened )
+            if (bCursorOpened)
             {
-                db_close_cursor ( poCursor);
+                db_close_cursor(poCursor);
                 bCursorOpened = false;
             }
-            if ( poDriver )
+            if (poDriver)
             {
-                db_close_database_shutdown_driver ( poDriver );
+                db_close_database_shutdown_driver(poDriver);
                 poDriver = NULL;
             }
 
@@ -703,76 +752,84 @@ OGRFeature *OGRGRASSLayer::GetNextFeature()
         }
 
         // Attributes
-        if( pszQuery != NULL && !paQueryMatch[iNextId] ) {
+        if (pszQuery != NULL && !paQueryMatch[iNextId])
+        {
             iNextId++;
             continue;
         }
 
         // Spatial
-        if( m_poFilterGeom && !paSpatialMatch[iNextId] ) {
+        if (m_poFilterGeom && !paSpatialMatch[iNextId])
+        {
             iNextId++;
             continue;
         }
 
-        break; // Attributes & spatial filter match
+        break;  // Attributes & spatial filter match
     }
 
-    OGRGeometry *poOGR = GetFeatureGeometry ( iNextId, &cat );
+    OGRGeometry *poOGR = GetFeatureGeometry(iNextId, &cat);
 
-    poFeature = new OGRFeature( poFeatureDefn );
-    poFeature->SetGeometryDirectly( poOGR );
-    poFeature->SetFID ( iNextId );
+    poFeature = new OGRFeature(poFeatureDefn);
+    poFeature->SetGeometryDirectly(poOGR);
+    poFeature->SetFID(iNextId);
     iNextId++;
 
     // Get attributes
-    CPLDebug ( "GRASS", "bHaveAttributes = %d", bHaveAttributes );
-    if ( bHaveAttributes )
+    CPLDebug("GRASS", "bHaveAttributes = %d", bHaveAttributes);
+    if (bHaveAttributes)
     {
-        if ( !poDriver )
+        if (!poDriver)
         {
             StartDbDriver();
         }
-        if ( poDriver ) {
-            if ( !bCursorOpened )
+        if (poDriver)
+        {
+            if (!bCursorOpened)
             {
                 OpenSequentialCursor();
             }
-            if ( bCursorOpened )
+            if (bCursorOpened)
             {
-                dbTable  *table = db_get_cursor_table ( poCursor );
-                if ( iCurrentCat < cat )
+                dbTable *table = db_get_cursor_table(poCursor);
+                if (iCurrentCat < cat)
                 {
-                    while ( true ) {
+                    while (true)
+                    {
                         int more;
-                        if( db_fetch ( poCursor, DB_NEXT, &more) != DB_OK )
+                        if (db_fetch(poCursor, DB_NEXT, &more) != DB_OK)
                         {
-                            CPLError( CE_Failure, CPLE_AppDefined,
-                                      "Cannot fetch attributes.");
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Cannot fetch attributes.");
                             break;
                         }
-                        if ( !more ) break;
+                        if (!more)
+                            break;
 
-                        dbColumn *column = db_get_table_column ( table, iCatField );
-                        dbValue *value = db_get_column_value ( column );
-                        iCurrentCat = db_get_value_int ( value );
+                        dbColumn *column =
+                            db_get_table_column(table, iCatField);
+                        dbValue *value = db_get_column_value(column);
+                        iCurrentCat = db_get_value_int(value);
 
-                        if ( iCurrentCat >= cat ) break;
+                        if (iCurrentCat >= cat)
+                            break;
                     }
                 }
-                if ( cat == iCurrentCat )
+                if (cat == iCurrentCat)
                 {
-                    SetAttributes ( poFeature, table );
+                    SetAttributes(poFeature, table);
                 }
                 else
                 {
-                    CPLError( CE_Failure, CPLE_AppDefined, "Attributes not found.");
+                    CPLError(CE_Failure, CPLE_AppDefined,
+                             "Attributes not found.");
                 }
             }
         }
     }
-    else if ( iLayer > 0 ) // Add category
+    else if (iLayer > 0)  // Add category
     {
-        poFeature->SetField( 0, cat );
+        poFeature->SetField(0, cat);
     }
 
     m_nFeaturesRead++;
@@ -781,73 +838,75 @@ OGRFeature *OGRGRASSLayer::GetNextFeature()
 /************************************************************************/
 /*                             GetFeature()                             */
 /************************************************************************/
-OGRFeature *OGRGRASSLayer::GetFeature( GIntBig nFeatureId )
+OGRFeature *OGRGRASSLayer::GetFeature(GIntBig nFeatureId)
 
 {
-    CPLDebug ( "GRASS", "OGRGRASSLayer::GetFeature nFeatureId = " CPL_FRMT_GIB,
-               nFeatureId );
+    CPLDebug("GRASS", "OGRGRASSLayer::GetFeature nFeatureId = " CPL_FRMT_GIB,
+             nFeatureId);
 
     int cat;
-    OGRGeometry *poOGR = GetFeatureGeometry ( nFeatureId, &cat );
+    OGRGeometry *poOGR = GetFeatureGeometry(nFeatureId, &cat);
 
-    OGRFeature* poFeature = new OGRFeature( poFeatureDefn );
-    poFeature->SetGeometryDirectly( poOGR );
-    poFeature->SetFID ( nFeatureId );
+    OGRFeature *poFeature = new OGRFeature(poFeatureDefn);
+    poFeature->SetGeometryDirectly(poOGR);
+    poFeature->SetFID(nFeatureId);
 
     // Get attributes
-    if ( bHaveAttributes && !poDriver )
+    if (bHaveAttributes && !poDriver)
     {
         StartDbDriver();
     }
-    if ( poDriver )
+    if (poDriver)
     {
-        if ( bCursorOpened )
+        if (bCursorOpened)
         {
-            db_close_cursor ( poCursor);
+            db_close_cursor(poCursor);
             bCursorOpened = false;
         }
-        CPLDebug ( "GRASS", "Open cursor for key = %d", cat );
+        CPLDebug("GRASS", "Open cursor for key = %d", cat);
         char buf[2000];
-        snprintf ( buf, sizeof(buf), "SELECT * FROM %s WHERE %s = %d",
-                       poLink->table, poLink->key, cat );
-        db_set_string ( poDbString, buf);
-        if ( db_open_select_cursor ( poDriver, poDbString,
-                    poCursor, DB_SEQUENTIAL) == DB_OK )
+        snprintf(buf, sizeof(buf), "SELECT * FROM %s WHERE %s = %d",
+                 poLink->table, poLink->key, cat);
+        db_set_string(poDbString, buf);
+        if (db_open_select_cursor(poDriver, poDbString, poCursor,
+                                  DB_SEQUENTIAL) == DB_OK)
         {
-            iCurrentCat = cat; // Not important
+            iCurrentCat = cat;  // Not important
             bCursorOpened = true;
         }
         else
         {
-            CPLError( CE_Failure, CPLE_AppDefined, "Cannot open cursor.");
+            CPLError(CE_Failure, CPLE_AppDefined, "Cannot open cursor.");
         }
 
-        if ( bCursorOpened )
+        if (bCursorOpened)
         {
             int more;
-            if( db_fetch ( poCursor, DB_NEXT, &more) != DB_OK )
+            if (db_fetch(poCursor, DB_NEXT, &more) != DB_OK)
             {
-                CPLError( CE_Failure, CPLE_AppDefined, "Cannot fetch attributes.");
+                CPLError(CE_Failure, CPLE_AppDefined,
+                         "Cannot fetch attributes.");
             }
             else
             {
-                if ( !more )
+                if (!more)
                 {
-                    CPLError( CE_Failure, CPLE_AppDefined, "Attributes not found.");
+                    CPLError(CE_Failure, CPLE_AppDefined,
+                             "Attributes not found.");
                 }
                 else
                 {
-                    dbTable *table = db_get_cursor_table ( poCursor );
-                    SetAttributes ( poFeature, table );
+                    dbTable *table = db_get_cursor_table(poCursor);
+                    SetAttributes(poFeature, table);
                 }
             }
-            db_close_cursor ( poCursor);
+            db_close_cursor(poCursor);
             bCursorOpened = false;
         }
     }
-    else if ( iLayer > 0 ) // Add category
+    else if (iLayer > 0)  // Add category
     {
-        poFeature->SetField( 0, cat );
+        poFeature->SetField(0, cat);
     }
 
     m_nFeaturesRead++;
@@ -857,42 +916,45 @@ OGRFeature *OGRGRASSLayer::GetFeature( GIntBig nFeatureId )
 /************************************************************************/
 /*                             GetFeatureGeometry()                     */
 /************************************************************************/
-OGRGeometry *OGRGRASSLayer::GetFeatureGeometry ( long nFeatureId, int *cat )
+OGRGeometry *OGRGRASSLayer::GetFeatureGeometry(long nFeatureId, int *cat)
 {
-    CPLDebug ( "GRASS", "OGRGRASSLayer::GetFeatureGeometry nFeatureId = %ld", nFeatureId );
+    CPLDebug("GRASS", "OGRGRASSLayer::GetFeatureGeometry nFeatureId = %ld",
+             nFeatureId);
 
     int cidx = paFeatureIndex[(int)nFeatureId];
 
     int type, id;
-    Vect_cidx_get_cat_by_index ( poMap, iLayerIndex, cidx, cat, &type, &id );
+    Vect_cidx_get_cat_by_index(poMap, iLayerIndex, cidx, cat, &type, &id);
 
     //CPLDebug ( "GRASS", "cat = %d type = %d id = %d", *cat, type, id );
 
     OGRGeometry *poOGR = NULL;
     int bIs3D = Vect_is_3d(poMap);
 
-    switch ( type ) {
+    switch (type)
+    {
         case GV_POINT:
         {
-            Vect_read_line ( poMap, poPoints, poCats, id);
+            Vect_read_line(poMap, poPoints, poCats, id);
             if (bIs3D)
-                poOGR = new OGRPoint( poPoints->x[0], poPoints->y[0], poPoints->z[0] );
+                poOGR = new OGRPoint(poPoints->x[0], poPoints->y[0],
+                                     poPoints->z[0]);
             else
-                poOGR = new OGRPoint( poPoints->x[0], poPoints->y[0] );
+                poOGR = new OGRPoint(poPoints->x[0], poPoints->y[0]);
         }
         break;
 
         case GV_LINE:
         case GV_BOUNDARY:
         {
-            Vect_read_line ( poMap, poPoints, poCats, id);
+            Vect_read_line(poMap, poPoints, poCats, id);
             OGRLineString *poOGRLine = new OGRLineString();
             if (bIs3D)
-                poOGRLine->setPoints( poPoints->n_points,
-                                      poPoints->x, poPoints->y, poPoints->z );
+                poOGRLine->setPoints(poPoints->n_points, poPoints->x,
+                                     poPoints->y, poPoints->z);
             else
-                poOGRLine->setPoints( poPoints->n_points,
-                                      poPoints->x, poPoints->y );
+                poOGRLine->setPoints(poPoints->n_points, poPoints->x,
+                                     poPoints->y);
 
             poOGR = poOGRLine;
         }
@@ -900,44 +962,45 @@ OGRGeometry *OGRGRASSLayer::GetFeatureGeometry ( long nFeatureId, int *cat )
 
         case GV_AREA:
         {
-            Vect_get_area_points ( poMap, id, poPoints );
+            Vect_get_area_points(poMap, id, poPoints);
 
             OGRPolygon *poOGRPoly = new OGRPolygon();
 
             OGRLinearRing *poRing = new OGRLinearRing();
             if (bIs3D)
-                poRing->setPoints( poPoints->n_points,
-                                poPoints->x, poPoints->y, poPoints->z );
+                poRing->setPoints(poPoints->n_points, poPoints->x, poPoints->y,
+                                  poPoints->z);
             else
-                poRing->setPoints( poPoints->n_points,
-                                poPoints->x, poPoints->y );
+                poRing->setPoints(poPoints->n_points, poPoints->x, poPoints->y);
 
-            poOGRPoly->addRingDirectly( poRing );
+            poOGRPoly->addRingDirectly(poRing);
 
             // Islands
-            int nisles = Vect_get_area_num_isles ( poMap, id );
-            for ( int i = 0; i < nisles; i++ ) {
-                int isle =  Vect_get_area_isle ( poMap, id, i );
-                Vect_get_isle_points ( poMap, isle, poPoints );
+            int nisles = Vect_get_area_num_isles(poMap, id);
+            for (int i = 0; i < nisles; i++)
+            {
+                int isle = Vect_get_area_isle(poMap, id, i);
+                Vect_get_isle_points(poMap, isle, poPoints);
 
                 poRing = new OGRLinearRing();
                 if (bIs3D)
-                    poRing->setPoints( poPoints->n_points,
-                                    poPoints->x, poPoints->y, poPoints->z );
+                    poRing->setPoints(poPoints->n_points, poPoints->x,
+                                      poPoints->y, poPoints->z);
                 else
-                    poRing->setPoints( poPoints->n_points,
-                                    poPoints->x, poPoints->y );
+                    poRing->setPoints(poPoints->n_points, poPoints->x,
+                                      poPoints->y);
 
-                poOGRPoly->addRingDirectly( poRing );
+                poOGRPoly->addRingDirectly(poRing);
             }
 
             poOGR = poOGRPoly;
         }
         break;
 
-        default: // Should not happen
+        default:  // Should not happen
         {
-            CPLError( CE_Failure, CPLE_AppDefined, "Unknown GRASS feature type.");
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Unknown GRASS feature type.");
             return NULL;
         }
     }
@@ -948,37 +1011,38 @@ OGRGeometry *OGRGRASSLayer::GetFeatureGeometry ( long nFeatureId, int *cat )
 /************************************************************************/
 /*                          SetAttributes()                             */
 /************************************************************************/
-bool OGRGRASSLayer::SetAttributes ( OGRFeature *poFeature, dbTable *table )
+bool OGRGRASSLayer::SetAttributes(OGRFeature *poFeature, dbTable *table)
 {
-    CPLDebug ( "GRASS", "OGRGRASSLayer::SetAttributes" );
+    CPLDebug("GRASS", "OGRGRASSLayer::SetAttributes");
 
-    for ( int i = 0; i < nFields; i++)
+    for (int i = 0; i < nFields; i++)
     {
-        dbColumn *column = db_get_table_column ( table, i );
-        dbValue *value = db_get_column_value ( column );
+        dbColumn *column = db_get_table_column(table, i);
+        dbValue *value = db_get_column_value(column);
 
-        int ctype = db_sqltype_to_Ctype ( db_get_column_sqltype(column) );
+        int ctype = db_sqltype_to_Ctype(db_get_column_sqltype(column));
 
-        if ( !db_test_value_isnull(value) )
+        if (!db_test_value_isnull(value))
         {
-            switch ( ctype ) {
+            switch (ctype)
+            {
                 case DB_C_TYPE_INT:
-                    poFeature->SetField( i, db_get_value_int ( value ));
+                    poFeature->SetField(i, db_get_value_int(value));
                     break;
                 case DB_C_TYPE_DOUBLE:
-                    poFeature->SetField( i, db_get_value_double ( value ));
+                    poFeature->SetField(i, db_get_value_double(value));
                     break;
                 case DB_C_TYPE_STRING:
-                    poFeature->SetField( i, db_get_value_string ( value ));
+                    poFeature->SetField(i, db_get_value_string(value));
                     break;
                 case DB_C_TYPE_DATETIME:
-                    db_convert_column_value_to_string ( column, poDbString );
-                    poFeature->SetField( i, db_get_string ( poDbString ));
+                    db_convert_column_value_to_string(column, poDbString);
+                    poFeature->SetField(i, db_get_string(poDbString));
                     break;
             }
         }
 
-        db_convert_column_value_to_string ( column, poDbString );
+        db_convert_column_value_to_string(column, poDbString);
         // CPLDebug ( "GRASS", "val = %s", db_get_string ( poDbString ));
     }
     return true;
@@ -992,10 +1056,10 @@ bool OGRGRASSLayer::SetAttributes ( OGRFeature *poFeature, dbTable *table )
 /*      Eventually we should consider implementing a more efficient     */
 /*      way of counting features matching a spatial query.              */
 /************************************************************************/
-GIntBig OGRGRASSLayer::GetFeatureCount( int bForce )
+GIntBig OGRGRASSLayer::GetFeatureCount(int bForce)
 {
-    if( m_poFilterGeom != NULL || m_poAttrQuery != NULL )
-        return OGRLayer::GetFeatureCount( bForce );
+    if (m_poFilterGeom != NULL || m_poAttrQuery != NULL)
+        return OGRLayer::GetFeatureCount(bForce);
 
     return nTotalCount;
 }
@@ -1009,11 +1073,11 @@ GIntBig OGRGRASSLayer::GetFeatureCount( int bForce )
 /*                                                                      */
 /*      Returns OGRERR_NONE/OGRRERR_FAILURE.                            */
 /************************************************************************/
-OGRErr OGRGRASSLayer::GetExtent (OGREnvelope *psExtent, int /*bForce*/)
+OGRErr OGRGRASSLayer::GetExtent(OGREnvelope *psExtent, int /*bForce*/)
 {
     struct bound_box box;
 
-    Vect_get_map_box ( poMap, &box );
+    Vect_get_map_box(poMap, &box);
 
     psExtent->MinX = box.W;
     psExtent->MinY = box.S;
@@ -1026,21 +1090,21 @@ OGRErr OGRGRASSLayer::GetExtent (OGREnvelope *psExtent, int /*bForce*/)
 /************************************************************************/
 /*                           TestCapability()                           */
 /************************************************************************/
-int OGRGRASSLayer::TestCapability( const char * pszCap )
+int OGRGRASSLayer::TestCapability(const char *pszCap)
 {
-    if( EQUAL(pszCap,OLCRandomRead) )
+    if (EQUAL(pszCap, OLCRandomRead))
         return TRUE;
 
-    else if( EQUAL(pszCap,OLCFastFeatureCount) )
+    else if (EQUAL(pszCap, OLCFastFeatureCount))
         return TRUE;
 
-    else if( EQUAL(pszCap,OLCFastSpatialFilter) )
+    else if (EQUAL(pszCap, OLCFastSpatialFilter))
         return FALSE;
 
-    else if( EQUAL(pszCap,OLCFastGetExtent) )
+    else if (EQUAL(pszCap, OLCFastGetExtent))
         return TRUE;
 
-    else if( EQUAL(pszCap,OLCFastSetNextByIndex) )
+    else if (EQUAL(pszCap, OLCFastSetNextByIndex))
         return TRUE;
 
     else
