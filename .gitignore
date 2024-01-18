@@ -1,0 +1,9 @@
+*~
+config.log
+config.status*
+autom*.cache
+*.o
+*.so
+*.dylib
+Makefile
+
