@@ -47,6 +47,7 @@ set(CMAKE_CXX_FLAGS
 # Build
 set(GLIB_SOURCES grass.cpp)
 set(OLIB_SOURCES ogrgrassdriver.cpp ogrgrassdatasource.cpp ogrgrasslayer.cpp)
+set(OLIB_HEADERS ogrgrass.h)
 
 add_library(gdal_grass SHARED ${GLIB_SOURCES})
 set_target_properties(gdal_grass PROPERTIES PREFIX "")
@@ -57,7 +58,7 @@ target_include_directories(
 target_link_libraries(gdal_grass PUBLIC ${GDAL_LIBRARY} ${G_LIBS})
 install(TARGETS gdal_grass DESTINATION ${AUTOLOAD_DIR})
 
-add_library(ogr_grass SHARED ${OLIB_SOURCES})
+add_library(ogr_grass SHARED ${OLIB_SOURCES} ${OLIB_HEADERS})
 set_target_properties(ogr_grass PROPERTIES PREFIX "")
 set_target_properties(ogr_grass PROPERTIES OUTPUT_NAME "ogr_GRASS")
 target_include_directories(
