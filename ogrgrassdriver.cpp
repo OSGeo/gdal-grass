@@ -30,7 +30,8 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-extern "C" {
+extern "C"
+{
     void RegisterOGRGRASS();
 }
 
@@ -39,13 +40,13 @@ CPL_CVSID("$Id$")
 /************************************************************************/
 /*                                Open()                                */
 /************************************************************************/
-static auto GRASSDatasetOpen(GDALOpenInfo *poOpenInfo) -> GDALDataset*
+static auto GRASSDatasetOpen(GDALOpenInfo *poOpenInfo) -> GDALDataset *
 {
     auto *poDS = new OGRGRASSDataSource();
 
     bool bUpdate = poOpenInfo->eAccess == GA_Update;
 
-    if( !poDS->Open( poOpenInfo->pszFilename, bUpdate, true ))
+    if (!poDS->Open(poOpenInfo->pszFilename, bUpdate, true))
     {
         delete poDS;
         return nullptr;
@@ -61,18 +62,18 @@ static auto GRASSDatasetOpen(GDALOpenInfo *poOpenInfo) -> GDALDataset*
 /************************************************************************/
 void RegisterOGRGRASS()
 {
-    if (! GDAL_CHECK_VERSION("OGR/GRASS driver"))
+    if (!GDAL_CHECK_VERSION("OGR/GRASS driver"))
         return;
 
-    if( GDALGetDriverByName( "OGR_GRASS" ) != nullptr )
+    if (GDALGetDriverByName("OGR_GRASS") != nullptr)
         return;
 
     auto *poDriver = new GDALDriver();
 
-    poDriver->SetDescription( "OGR_GRASS" );
-    poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
-    poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GRASS Vectors (5.7+)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/grass.html" );
+    poDriver->SetDescription("OGR_GRASS");
+    poDriver->SetMetadataItem(GDAL_DCAP_VECTOR, "YES");
+    poDriver->SetMetadataItem(GDAL_DMD_LONGNAME, "GRASS Vectors (5.7+)");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/vector/grass.html");
 
     poDriver->pfnOpen = GRASSDatasetOpen;
 
