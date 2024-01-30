@@ -1,5 +1,4 @@
 /******************************************************************************
- * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/GRASS driver.
@@ -51,28 +50,32 @@ class OGRGRASSLayer final : public OGRLayer
     virtual ~OGRGRASSLayer();
 
     // Layer info
-    OGRFeatureDefn *GetLayerDefn() override
+    auto GetName() -> const char * override
+    {
+        return osName.c_str();
+    }
+    auto GetLayerDefn() -> OGRFeatureDefn * override
     {
         return poFeatureDefn;
     }
-    GIntBig GetFeatureCount(int) override;
-    OGRErr GetExtent(OGREnvelope *psExtent, int bForce) override;
-    virtual OGRErr GetExtent(int iGeomField, OGREnvelope *psExtent,
-                             int bForce) override
+    auto GetFeatureCount(int) -> GIntBig override;
+    auto GetExtent(OGREnvelope *psExtent, int bForce) -> OGRErr override;
+    virtual auto GetExtent(int iGeomField, OGREnvelope *psExtent, int bForce)
+        -> OGRErr override
     {
         return OGRLayer::GetExtent(iGeomField, psExtent, bForce);
     }
-    virtual OGRSpatialReference *GetSpatialRef() override;
-    int TestCapability(const char *) override;
+    virtual auto GetSpatialRef() -> OGRSpatialReference * override;
+    auto TestCapability(const char *) -> int override;
 
     // Reading
     void ResetReading() override;
-    virtual OGRErr SetNextByIndex(GIntBig nIndex) override;
-    OGRFeature *GetNextFeature() override;
-    OGRFeature *GetFeature(GIntBig nFeatureId) override;
+    virtual auto SetNextByIndex(GIntBig nIndex) -> OGRErr override;
+    auto GetNextFeature() -> OGRFeature * override;
+    auto GetFeature(GIntBig nFeatureId) -> OGRFeature * override;
 
     // Filters
-    virtual OGRErr SetAttributeFilter(const char *query) override;
+    virtual auto SetAttributeFilter(const char *query) -> OGRErr override;
     virtual void SetSpatialFilter(OGRGeometry *poGeomIn) override;
     virtual void SetSpatialFilter(int iGeomField, OGRGeometry *poGeom) override
     {
@@ -80,12 +83,12 @@ class OGRGRASSLayer final : public OGRLayer
     }
 
   private:
-    char *pszName;
+    std::string osName;
     OGRSpatialReference *poSRS;
     OGRFeatureDefn *poFeatureDefn;
     char *pszQuery;  // Attribute filter string
 
-    int iNextId;
+    GIntBig iNextId;
     int nTotalCount;
     int iLayer;       // Layer number
     int iLayerIndex;  // Layer index (in GRASS category index)
@@ -110,21 +113,21 @@ class OGRGRASSLayer final : public OGRLayer
     struct line_pnts *poPoints;
     struct line_cats *poCats;
 
-    bool StartDbDriver();
-    bool StopDbDriver();
+    auto StartDbDriver() -> bool;
+    auto StopDbDriver() -> bool;
 
-    OGRGeometry *GetFeatureGeometry(long nFeatureId, int *cat);
-    bool SetAttributes(OGRFeature *feature, dbTable *table);
+    auto GetFeatureGeometry(long nFeatureId, int *cat) -> OGRGeometry *;
+    auto SetAttributes(OGRFeature *feature, dbTable *table) -> bool;
 
     // Features matching spatial filter for ALL features/elements in GRASS
     char *paSpatialMatch;
-    bool SetSpatialMatch();
+    auto SetSpatialMatch() -> bool;
 
     // Features matching attribute filter for ALL features/elements in GRASS
     char *paQueryMatch;
-    bool OpenSequentialCursor();
-    bool ResetSequentialCursor();
-    bool SetQueryMatch();
+    auto OpenSequentialCursor() -> bool;
+    auto ResetSequentialCursor() -> bool;
+    auto SetQueryMatch() -> bool;
 };
 
 /************************************************************************/
@@ -133,38 +136,40 @@ class OGRGRASSLayer final : public OGRLayer
 class OGRGRASSDataSource final : public OGRDataSource
 {
   public:
-    OGRGRASSDataSource();
+    OGRGRASSDataSource() = default;
     virtual ~OGRGRASSDataSource();
 
-    bool Open(const char *, bool bUpdate, bool bTestOpen,
-              bool bSingleNewFile = false);
+    auto Open(const char *, bool bUpdate, bool bTestOpen,
+              bool bSingleNewFile = false) -> bool;
 
-    const char *GetName() override
+    auto GetName() -> const char * override
     {
-        return pszName;
+        return osName.c_str();
     }
-    int GetLayerCount() override
+    auto GetLayerCount() -> int override
     {
         return nLayers;
     }
-    OGRLayer *GetLayer(int) override;
+    auto GetLayer(int) -> OGRLayer * override;
 
-    int TestCapability(const char *) override;
+    auto TestCapability(const char *) -> int override;
 
   private:
-    OGRGRASSLayer **papoLayers;
-    char *pszName;      // Date source name
-    char *pszGisdbase;  // GISBASE
-    char *pszLocation;  // location name
-    char *pszMapset;    // mapset name
-    char *pszMap;       // name of vector map
+    OGRGRASSLayer **papoLayers{nullptr};
+    std::string osName;      // Date source name
+    std::string osGisdbase;  // GISBASE
+    std::string osLocation;  // location name
+    std::string osMapset;    // mapset name
+    std::string osMap;       // name of vector map
 
-    struct Map_info map;
-    int nLayers;
+    struct Map_info map
+    {
+    };
+    int nLayers{0};
 
-    bool bOpened;
+    bool bOpened{false};
 
-    static bool SplitPath(char *, char **, char **, char **, char **);
+    auto SetPath(const char *) -> bool;
 };
 
 #endif /* ndef OGRGRASS_H_INCLUDED */
