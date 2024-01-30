@@ -5,6 +5,9 @@ on:
   - push
   - pull_request
 
+env:
+  GDAL_AUTOLOAD_DIR: $HOME/gdalplugins
+  GDAL_AUTOLOAD_CMAKE_DIR: $HOME/gdalplugins_cmake
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,19 +24,44 @@ jobs:
               --no-install-suggests
       - name: Create GDAL_AUTOLOAD directory
         run: |
-          mkdir $HOME/gdalplugins
+          mkdir ${{ env.GDAL_AUTOLOAD_DIR }}
       - name: Setup test data
         run: |
           mkdir -p $HOME/grassdata
           cd $HOME/grassdata/
           wget -c --quiet https://grass.osgeo.org/sampledata/north_carolina/nc_spm_08_micro.zip
           unzip nc_spm_08_micro.zip
-          rm -f nc_spm_08_micro.zip       
+          rm -f nc_spm_08_micro.zip
       - name: Build
-        run: .github/workflows/build_ubuntu.sh $HOME/gdalplugins
+        run: .github/workflows/build_ubuntu.sh ${{ env.GDAL_AUTOLOAD_DIR }}
       - name: Test executing of GDAL with driver on GRASS maps
-        run: .github/workflows/test_simple.sh $HOME/gdalplugins
-      - name: Build with CMake
-        run: .github/workflows/build_ubuntu_cmake.sh $HOME/gdalplugins_cmake
+        run: .github/workflows/test_simple.sh ${{ env.GDAL_AUTOLOAD_DIR }}
+      - name: Create GDAL_AUTOLOAD directory for CMake
+        run: |
+          mkdir ${{ env.GDAL_AUTOLOAD_CMAKE_DIR }}
+      - name: Set up Python for tests
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-env pytest-sugar gdal==3.6.4
+      - name: CMake configure
+        run: |
+          cmake -B build -DAUTOLOAD_DIR=${{ env.GDAL_AUTOLOAD_CMAKE_DIR }}
+      - name: CMake build
+        run: |
+          cmake --build build
+      - name: CTest
+        run: |
+          export GDAL_DRIVER_PATH=${GITHUB_WORKSPACE}/build
+          export LD_LIBRARY_PATH=$(grass --config path)/lib
+          cd build
+          ctest --output-on-failure
+      - name: Install with CMake
+        run: |
+          cmake --install build
       - name: Test executing of GDAL with driver on GRASS maps (CMake)
-        run: .github/workflows/test_simple.sh $HOME/gdalplugins_cmake
+        run: |
+          .github/workflows/test_simple.sh ${{ env.GDAL_AUTOLOAD_CMAKE_DIR }}
