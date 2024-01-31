@@ -19,6 +19,7 @@ set(COMPLETE_VERSION
     ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}
 )
 project(gdal-grass VERSION ${COMPLETE_VERSION})
+include(CTest)
 
 # ##############################################################################
 # Dependencies and flags
@@ -65,3 +66,18 @@ target_include_directories(
                     ${GRASS_INCLUDE} ${PROJINC})
 target_link_libraries(ogr_grass PUBLIC ${GDAL_LIBRARY} ${G_LIBS})
 install(TARGETS ogr_grass DESTINATION ${AUTOLOAD_DIR})
+
+# ##############################################################################
+# Tests
+
+if (Python_LOOKUP_VERSION)
+    set(Python_FIND_STRATEGY VERSION)
+    find_package(Python ${Python_LOOKUP_VERSION} EXACT COMPONENTS Interpreter Development NumPy)
+else ()
+    set(Python_FIND_STRATEGY LOCATION)
+    find_package(Python 3.11 COMPONENTS Interpreter Development NumPy)
+endif ()
+
+if (BUILD_TESTING AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/autotest")
+    add_subdirectory(autotest)
+endif ()
