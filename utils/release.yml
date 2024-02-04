@@ -1,0 +1,26 @@
+---
+notes:
+  categories:
+    - title: Documentation and Messages
+      regexp: '(docs?|man|manual|manual pages|[Ss]phinx|mkhtml|messages?|README): '
+
+    - title: Libraries and General Functionality
+      regexp: '(grass_|lib|TGIS|tgis|raster|vector)[^ ]*: '
+
+    - title: Windows
+      regexp: '(winGRASS|win|[Ww]indows): '
+
+    - title: Packaging, Configuration, Portability, and Compilation
+      regexp: '(packaging|pkg|rpm|deb|pkg-config|configure|config|[Mm]ake|build): '
+
+    - title: Continuous Integration, Tests, Code Quality, and Checks
+      regexp: '(CI|ci|CI\(deps\)|ci\(deps\)|[Tt]ests|[Cc]hecks|pytest): '
+
+    - title: Contributing and Management
+      regexp: '(contributing|CONTRIBUTING.md|contributors|contributors.csv): '
+
+  exclude:
+    regexp:
+      - '[Hh]appy [Nn]ew [Yy]ear'
+      - 'version: '
+      - 'RFC: '
