@@ -103,7 +103,7 @@ def print_notes(
     """
     num_changes = round_down_to_five(len(changes))
     print(
-        f"The GRASS GIS {end_tag} release provides more than "
+        f"The gdal-grass {end_tag} release provides more than "
         f"{num_changes} improvements and fixes "
         f"with respect to the release {start_tag}.\n"
     )
@@ -124,7 +124,7 @@ def notes_from_gh_api(start_tag, end_tag, branch, categories, exclude):
         [
             "gh",
             "api",
-            "repos/OSGeo/grass/releases/generate-notes",
+            "repos/OSGeo/gdal-grass/releases/generate-notes",
             "-f",
             f"previous_tag_name={start_tag}",
             "-f",
