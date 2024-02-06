@@ -53,8 +53,8 @@ add_library(gdal_grass SHARED ${GLIB_SOURCES})
 set_target_properties(gdal_grass PROPERTIES PREFIX "")
 set_target_properties(gdal_grass PROPERTIES OUTPUT_NAME "gdal_GRASS")
 target_include_directories(
-  gdal_grass PRIVATE ${CMAKE_SOURCE_DIR} ${GDAL_INCLUDE_DIR} ${PQ_INCLUDE}
-                     ${GRASS_INCLUDE} ${PROJINC})
+  gdal_grass PRIVATE ${CMAKE_SOURCE_DIR} ${GDAL_INCLUDE_DIR} ${PostgreSQL_INCLUDE_DIRS}
+                     ${GRASS_INCLUDE} ${PROJ_INCLUDE_DIRS})
 target_link_libraries(gdal_grass PUBLIC ${GDAL_LIBRARY} ${G_LIBS})
 install(TARGETS gdal_grass DESTINATION ${AUTOLOAD_DIR})
 
@@ -62,8 +62,8 @@ add_library(ogr_grass SHARED ${OLIB_SOURCES})
 set_target_properties(ogr_grass PROPERTIES PREFIX "")
 set_target_properties(ogr_grass PROPERTIES OUTPUT_NAME "ogr_GRASS")
 target_include_directories(
-  ogr_grass PRIVATE ${CMAKE_SOURCE_DIR} ${GDAL_INCLUDE_DIR} ${PQ_INCLUDE}
-                    ${GRASS_INCLUDE} ${PROJINC})
+  ogr_grass PRIVATE ${CMAKE_SOURCE_DIR} ${GDAL_INCLUDE_DIR} ${PostgreSQL_INCLUDE_DIRS}
+                    ${GRASS_INCLUDE} ${PROJ_INCLUDE_DIRS})
 target_link_libraries(ogr_grass PUBLIC ${GDAL_LIBRARY} ${G_LIBS})
 install(TARGETS ogr_grass DESTINATION ${AUTOLOAD_DIR})
 
