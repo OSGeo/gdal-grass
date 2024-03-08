@@ -31,7 +31,7 @@ jobs:
           md5sum ${{ env.GDAL-GRASS }}.tar.xz > ${{ env.GDAL-GRASS }}.tar.xz.md5
           sha256sum ${{ env.GDAL-GRASS }}.tar.xz > ${{ env.GDAL-GRASS }}.tar.xz.sha256
       - name: Publish distribution to GitHub
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
               ${{ env.OUT_DIR }}/${{ env.GDAL-GRASS }}.tar.gz
