@@ -27,8 +27,7 @@ support files.
 
 (to be deprecated after 1.0.3 release)
 
-Typically the configure and build process would look
-something like with Autotools:
+Typically, the configure and build process looks like:
 
 ```bash
 ./configure --with-gdal=/usr/bin/gdal-config \
@@ -58,7 +57,7 @@ cmake .. -DAUTOLOAD_DIR=/opt/local/lib/gdalplugins \
 
 ## Usage
 
-Set the driver path:
+Set the driver path (e.g. in $HOME/.bashrc):
 
 ```bash
 GDAL_DRIVER_PATH="/usr/lib/gdalplugins"
