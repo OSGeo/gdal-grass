@@ -27,6 +27,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#include <array>
 #include <csignal>
 
 #include "ogrgrass.h"

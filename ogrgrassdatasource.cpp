@@ -27,6 +27,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#include <array>
 #include <cstring>
 
 #include "ogrgrass.h"
