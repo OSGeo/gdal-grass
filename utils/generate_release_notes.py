@@ -65,7 +65,7 @@ def split_to_categories(changes, categories):
 
 
 def print_section_heading_2(text, file=None):
-    print(f"### {text}\n", file=file)
+    print(f"## {text}\n", file=file)
 
 
 def print_section_heading_3(text, file=None):
