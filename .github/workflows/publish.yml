@@ -43,7 +43,13 @@ jobs:
         run: |
           lasttag=""
           for tag in $(git tag -n --sort=-creatordate | cut -d' ' -f 1); do
-              if [[ $tag != *"RC"* && $tag != ${{ github.ref_name }} ]]; then
+              if [[ ${{ github.ref_name }} != *"rc"* && $tag != *"rc"* && \
+                  $tag != ${{ github.ref_name }} ]]
+              then
+                  lasttag="$tag"
+                  break
+              elif [[ $tag != ${{ github.ref_name }} && ${{ github.ref_name }} == *"rc"* ]]
+              then
                   lasttag="$tag"
                   break
               fi

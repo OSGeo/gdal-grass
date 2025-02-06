@@ -11,7 +11,7 @@ notes:
       regexp: '(winGRASS|win|[Ww]indows): '
 
     - title: Packaging, Configuration, Portability, and Compilation
-      regexp: '(packaging|pkg|rpm|deb|pkg-config|configure|config|[Mm]ake|build): '
+      regexp: '(packaging|pkg|rpm|deb|pkg-config|configure|config|[Mm]ake|build|cmake): '
 
     - title: Continuous Integration, Tests, Code Quality, and Checks
       regexp: '(CI|ci|CI\(deps\)|ci\(deps\)|[Tt]ests|[Cc]hecks|pytest): '
