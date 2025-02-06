@@ -6,7 +6,6 @@ on:
   - pull_request
 
 env:
-  GDAL_AUTOLOAD_DIR: $HOME/gdalplugins
   GDAL_AUTOLOAD_CMAKE_DIR: $HOME/gdalplugins_cmake
 jobs:
   build:
@@ -22,9 +21,6 @@ jobs:
           xargs -a <(awk '! /^ *(#|$)/' ".github/workflows/apt.txt") -r -- \
               sudo apt-get install -y --no-install-recommends \
               --no-install-suggests
-      - name: Create GDAL_AUTOLOAD directory
-        run: |
-          mkdir ${{ env.GDAL_AUTOLOAD_DIR }}
       - name: Setup test data
         run: |
           mkdir -p $HOME/grassdata
@@ -32,10 +28,6 @@ jobs:
           wget -c --quiet https://grass.osgeo.org/sampledata/north_carolina/nc_spm_08_micro.zip
           unzip nc_spm_08_micro.zip
           rm -f nc_spm_08_micro.zip
-      - name: Build
-        run: .github/workflows/build_ubuntu.sh ${{ env.GDAL_AUTOLOAD_DIR }}
-      - name: Test executing of GDAL with driver on GRASS maps
-        run: .github/workflows/test_simple.sh ${{ env.GDAL_AUTOLOAD_DIR }}
       - name: Create GDAL_AUTOLOAD directory for CMake
         run: |
           mkdir ${{ env.GDAL_AUTOLOAD_CMAKE_DIR }}

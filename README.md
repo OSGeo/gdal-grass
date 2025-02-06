@@ -23,19 +23,6 @@ and finally build and install this driver in
 To build this driver it is necessary for it to find GDAL and GRASS
 support files.
 
-**Building with Autotools:**
-
-(to be deprecated after 1.0.3 release)
-
-Typically, the configure and build process looks like:
-
-```bash
-./configure --with-gdal=/usr/bin/gdal-config \
-            --with-grass=/usr/grass
-make
-sudo make install
-```
-
 **Building with CMake:**
 
 ```bash
