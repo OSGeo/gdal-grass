@@ -16,7 +16,7 @@ version="x.y.z"
 commit=$(git rev-parse HEAD)
 tag_message="gdal-grass ${version}"
 git tag -a -m "${tag_message}" $version $commit
-git push -u --tags upstream
+git push --tags upstream
 ```
 
 2. Create a new release on GH, based on the above created tag. "Publish release"
