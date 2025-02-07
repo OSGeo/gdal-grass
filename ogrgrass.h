@@ -14,6 +14,7 @@
 #ifndef OGRGRASS_H_INCLUDED
 #define OGRGRASS_H_INCLUDED
 
+#include "gdal_version.h"
 #include "ogrsf_frmts.h"
 
 extern "C"
@@ -44,12 +45,18 @@ class OGRGRASSLayer final : public OGRLayer
         return poFeatureDefn;
     }
     auto GetFeatureCount(int) -> GIntBig override;
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
+    auto IGetExtent(int iGeomField, OGREnvelope *psExtent, bool bForce) -> OGRErr override;
+#else
     auto GetExtent(OGREnvelope *psExtent, int bForce) -> OGRErr override;
     virtual auto GetExtent(int iGeomField, OGREnvelope *psExtent, int bForce)
         -> OGRErr override
     {
         return OGRLayer::GetExtent(iGeomField, psExtent, bForce);
     }
+#endif
+
     virtual auto GetSpatialRef() -> OGRSpatialReference * override;
     auto TestCapability(const char *) -> int override;
 
@@ -61,11 +68,16 @@ class OGRGRASSLayer final : public OGRLayer
 
     // Filters
     virtual auto SetAttributeFilter(const char *query) -> OGRErr override;
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
+    virtual OGRErr ISetSpatialFilter(int iGeomField, const OGRGeometry *poGeom) override;
+#else
     virtual void SetSpatialFilter(OGRGeometry *poGeomIn) override;
     virtual void SetSpatialFilter(int iGeomField, OGRGeometry *poGeom) override
     {
         OGRLayer::SetSpatialFilter(iGeomField, poGeom);
     }
+#endif
 
   private:
     std::string osName;

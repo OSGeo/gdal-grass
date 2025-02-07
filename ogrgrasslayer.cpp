@@ -618,11 +618,19 @@ auto OGRGRASSLayer::ResetSequentialCursor() -> bool
 /************************************************************************/
 /*                           SetSpatialFilter                           */
 /************************************************************************/
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
+OGRErr OGRGRASSLayer::ISetSpatialFilter(int iGeomField, const OGRGeometry *poGeomIn)
+#else
 void OGRGRASSLayer::SetSpatialFilter(OGRGeometry *poGeomIn)
+#endif
 {
     CPLDebug("GRASS", "SetSpatialFilter");
 
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
+    OGRLayer::ISetSpatialFilter(iGeomField, poGeomIn);
+#else
     OGRLayer::SetSpatialFilter(poGeomIn);
+#endif
 
     if (poGeomIn == nullptr)
     {
@@ -632,10 +640,15 @@ void OGRGRASSLayer::SetSpatialFilter(OGRGeometry *poGeomIn)
             CPLFree(paSpatialMatch);
             paSpatialMatch = nullptr;
         }
-        return;
+    }
+    else
+    {
+        SetSpatialMatch();
     }
 
-    SetSpatialMatch();
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
+    return OGRERR_NONE;
+#endif
 }
 
 /************************************************************************/
@@ -1049,7 +1062,12 @@ auto OGRGRASSLayer::GetFeatureCount(int bForce) -> GIntBig
 /*                                                                      */
 /*      Returns OGRERR_NONE/OGRRERR_FAILURE.                            */
 /************************************************************************/
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
+auto OGRGRASSLayer::IGetExtent(int /*iGeomField */, OGREnvelope *psExtent, bool /*bForce*/) -> OGRErr
+#else
 auto OGRGRASSLayer::GetExtent(OGREnvelope *psExtent, int /*bForce*/) -> OGRErr
+#endif
 {
     struct bound_box box
     {
