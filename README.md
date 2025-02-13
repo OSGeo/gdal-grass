@@ -86,7 +86,8 @@ The release policies of the GDAL-GRASS driver are (so far) fairly simple:
 - we follow the GDAL development for their breaking changes:
   - as of 2022, any GDAL 2+ and GDAL 3+ version is compliant, with GDAL 3+ recommended.
 - we follow the GRASS GIS development for their breaking changes:
-  - as of 2022, any GRASS GIS 7+ and GRASS GIS 8+ version is compliant, with GRASS GIS 8+ recommended.
+  - as of 2022, any GRASS GIS 7+ and GRASS GIS 8+ version is compliant,
+    with GRASS GIS 8+ recommended.
 
 We expect low maintenance needs for this driver.
 

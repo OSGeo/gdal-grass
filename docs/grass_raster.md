@@ -7,46 +7,46 @@ libgrass to be pre-installed (see Notes below).
 
 GRASS raster maps/imagery groups can be selected in several ways.
 
-1.  The full path to the `cellhd` file can be specified. This is not a
-    relative path, or at least it must contain all the path components
-    within the GRASS database including the database root itself. The
-    following example opens the raster map "elevation" within the GRASS
-    mapset "PERMANENT" of the GRASS location "myloc" in the GRASS
-    database located at `/data/grassdb`.
-    
-    For example:
-    
-        gdalinfo /data/grassdb/myloc/PERMANENT/cellhd/elevation
+1. The full path to the `cellhd` file can be specified. This is not a
+   relative path, or at least it must contain all the path components
+   within the GRASS database including the database root itself. The
+   following example opens the raster map "elevation" within the GRASS
+   mapset "PERMANENT" of the GRASS location "myloc" in the GRASS
+   database located at `/data/grassdb`.
 
-2.  The full path to the directory containing information about an
-    imagery group (or the REF file within it) can be specified to refer
-    to the whole group as a single dataset. The following examples do
-    the same thing.
-    
-    For example:
-    
-        gdalinfo /data/grassdb/imagery/raw/group/testmff/REF
-        gdalinfo /data/grassdb/imagery/raw/group/testmff
+   For example:
 
-3.  If there is a correct `.grassrc7/rc` (GRASS 7) setup file in the
-    user's home directory then raster maps or imagery groups may be
-    opened just by the cell or group name. This only works for raster
-    maps or imagery groups in the current GRASS location and mapset as
-    defined in the GRASS setup file.
+       gdalinfo /data/grassdb/myloc/PERMANENT/cellhd/elevation
+
+2. The full path to the directory containing information about an
+   imagery group (or the REF file within it) can be specified to refer
+   to the whole group as a single dataset. The following examples do
+   the same thing.
+
+   For example:
+
+       gdalinfo /data/grassdb/imagery/raw/group/testmff/REF
+       gdalinfo /data/grassdb/imagery/raw/group/testmff
+
+3. If there is a correct `.grassrc7/rc` (GRASS 7) setup file in the
+   user's home directory then raster maps or imagery groups may be
+   opened just by the cell or group name. This only works for raster
+   maps or imagery groups in the current GRASS location and mapset as
+   defined in the GRASS setup file.
 
 The following features are supported by the GDAL/GRASS link.
 
-  - Up to 256 entries from raster colormaps are read (0-255).
-  - Compressed and uncompressed integer (CELL), floating point (FCELL)
-    and double precision (DCELL) raster maps are all supported. Integer
-    raster maps are classified with a band type of "Byte" if the 1-byte
-    per pixel format is used, or "UInt16" if the two byte per pixel
-    format is used. Otherwise integer raster maps are treated as
-    "UInt32".
-  - Georeferencing information is properly read from GRASS format.
-  - An attempt is made to translate coordinate systems, but some
-    conversions may be flawed, in particular in handling of datums and
-    units.
+- Up to 256 entries from raster colormaps are read (0-255).
+- Compressed and uncompressed integer (CELL), floating point (FCELL)
+  and double precision (DCELL) raster maps are all supported. Integer
+  raster maps are classified with a band type of "Byte" if the 1-byte
+  per pixel format is used, or "UInt16" if the two byte per pixel
+  format is used. Otherwise integer raster maps are treated as
+  "UInt32".
+- Georeferencing information is properly read from GRASS format.
+- An attempt is made to translate coordinate systems, but some
+  conversions may be flawed, in particular in handling of datums and
+  units.
 
 ## Driver capabilities
 
@@ -62,5 +62,5 @@ though it is hoped that will be corrected at some point.
 
 ## See Also
 
-  - [GRASS GIS home page](https://grass.osgeo.org)
-  - [old libgrass page](https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/grass/)
+- [GRASS GIS home page](https://grass.osgeo.org)
+- [old libgrass page](https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/grass/)

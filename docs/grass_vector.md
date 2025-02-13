@@ -104,8 +104,8 @@ layer is finished, because in that case kill() is not used.
 
 ## See Also
 
-  - [GRASS GIS home page](https://grass.osgeo.org)
-  - [old libgrass page](https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/grass/)
+- [GRASS GIS home page](https://grass.osgeo.org)
+- [old libgrass page](https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/grass/)
 
 -----
 
