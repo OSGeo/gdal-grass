@@ -46,8 +46,9 @@ class OGRGRASSLayer final : public OGRLayer
     }
     auto GetFeatureCount(int) -> GIntBig override;
 
-#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
-    auto IGetExtent(int iGeomField, OGREnvelope *psExtent, bool bForce) -> OGRErr override;
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 11, 0)
+    auto IGetExtent(int iGeomField, OGREnvelope *psExtent, bool bForce)
+        -> OGRErr override;
 #else
     auto GetExtent(OGREnvelope *psExtent, int bForce) -> OGRErr override;
     virtual auto GetExtent(int iGeomField, OGREnvelope *psExtent, int bForce)
@@ -69,8 +70,9 @@ class OGRGRASSLayer final : public OGRLayer
     // Filters
     virtual auto SetAttributeFilter(const char *query) -> OGRErr override;
 
-#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
-    virtual OGRErr ISetSpatialFilter(int iGeomField, const OGRGeometry *poGeom) override;
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 11, 0)
+    virtual OGRErr ISetSpatialFilter(int iGeomField,
+                                     const OGRGeometry *poGeom) override;
 #else
     virtual void SetSpatialFilter(OGRGeometry *poGeomIn) override;
     virtual void SetSpatialFilter(int iGeomField, OGRGeometry *poGeom) override
