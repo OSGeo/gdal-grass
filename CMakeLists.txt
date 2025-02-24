@@ -48,8 +48,9 @@ set(CMAKE_CXX_FLAGS
 
 # ##############################################################################
 # Build
-set(GLIB_SOURCES grass.cpp)
-set(OLIB_SOURCES ogrgrassdriver.cpp ogrgrassdatasource.cpp ogrgrasslayer.cpp ogrgrass.h)
+set(GLIB_SOURCES source/grass.cpp)
+set(OLIB_SOURCES source/ogrgrassdriver.cpp source/ogrgrassdatasource.cpp
+                 source/ogrgrasslayer.cpp source/ogrgrass.h)
 
 add_library(gdal_grass SHARED ${GLIB_SOURCES})
 set_target_properties(gdal_grass PROPERTIES PREFIX "")
