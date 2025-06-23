@@ -553,7 +553,7 @@ auto GRASSRasterBand::IReadBlock(int /*nBlockXOff*/, int nBlockYOff,
         }
 
         GDALCopyWords(static_cast<void *>(cbuf), GDT_Int32, sizeof(CELL),
-                      pImage, eDataType, GDALGetDataTypeSize(eDataType) / 8,
+                      pImage, eDataType, GDALGetDataTypeSizeBytes(eDataType),
                       nBlockXSize);
 
         G_free(cbuf);
@@ -643,7 +643,7 @@ auto GRASSRasterBand::IRasterIO(GDALRWFlag eRWFlag, int nXOff, int nYOff,
 
     /* Reset space if default (0) */
     if (nPixelSpace == 0)
-        nPixelSpace = GDALGetDataTypeSize(eBufType) / 8;
+        nPixelSpace = GDALGetDataTypeSizeBytes(eBufType);
 
     if (nLineSpace == 0)
         nLineSpace = nBufXSize * nPixelSpace;
