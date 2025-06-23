@@ -115,13 +115,22 @@ class GRASSDataset final : public GDALDataset
 
     OGRSpatialReference m_oSRS{};
 
-    std::array<double, 6> adfGeoTransform{0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 12, 0)
+    GDALGeoTransform m_gt{};
+#else
+    std::array<double, 6> m_gt{0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+#endif
 
   public:
     explicit GRASSDataset(GRASSRasterPath &);
 
     auto GetSpatialRef() const -> const OGRSpatialReference * override;
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 12, 0)
+    auto GetGeoTransform(GDALGeoTransform &) const -> CPLErr override;
+#else
     auto GetGeoTransform(double *) -> CPLErr override;
+#endif
 
     static auto Open(GDALOpenInfo *) -> GDALDataset *;
 };
@@ -834,12 +843,22 @@ auto GRASSDataset::GetSpatialRef() const -> const OGRSpatialReference *
 /*                          GetGeoTransform()                           */
 /************************************************************************/
 
-auto GRASSDataset::GetGeoTransform(double *padfGeoTransform) -> CPLErr
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 12, 0)
+auto GRASSDataset::GetGeoTransform(GDALGeoTransform &gt) const -> CPLErr
 {
-    memcpy(padfGeoTransform, adfGeoTransform.data(), sizeof(double) * 6);
+    gt = m_gt;
 
     return CE_None;
 }
+#else
+auto GRASSDataset::GetGeoTransform(double *padfGeoTransform) -> CPLErr
+{
+    memcpy(padfGeoTransform, m_gt.data(), sizeof(double) * 6);
+
+    return CE_None;
+}
+#endif
 
 /************************************************************************/
 /*                                Open()                                */
@@ -980,12 +999,12 @@ auto GRASSDataset::Open(GDALOpenInfo *poOpenInfo) -> GDALDataset *
     poDS->nRasterXSize = poDS->sCellInfo.cols;
     poDS->nRasterYSize = poDS->sCellInfo.rows;
 
-    poDS->adfGeoTransform[0] = poDS->sCellInfo.west;
-    poDS->adfGeoTransform[1] = poDS->sCellInfo.ew_res;
-    poDS->adfGeoTransform[2] = 0.0;
-    poDS->adfGeoTransform[3] = poDS->sCellInfo.north;
-    poDS->adfGeoTransform[4] = 0.0;
-    poDS->adfGeoTransform[5] = -1 * poDS->sCellInfo.ns_res;
+    poDS->m_gt[0] = poDS->sCellInfo.west;
+    poDS->m_gt[1] = poDS->sCellInfo.ew_res;
+    poDS->m_gt[2] = 0.0;
+    poDS->m_gt[3] = poDS->sCellInfo.north;
+    poDS->m_gt[4] = 0.0;
+    poDS->m_gt[5] = -1 * poDS->sCellInfo.ns_res;
 
     /* -------------------------------------------------------------------- */
     /*      Try to get a projection definition.                             */
