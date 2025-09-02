@@ -1088,7 +1088,11 @@ auto OGRGRASSLayer::GetExtent(OGREnvelope *psExtent, int /*bForce*/) -> OGRErr
 /************************************************************************/
 /*                           TestCapability()                           */
 /************************************************************************/
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,12,0)
+auto OGRGRASSLayer::TestCapability(const char *pszCap) const -> int
+#else
 auto OGRGRASSLayer::TestCapability(const char *pszCap) -> int
+#endif
 {
     if (EQUAL(pszCap, OLCRandomRead))
         return TRUE;
@@ -1112,7 +1116,11 @@ auto OGRGRASSLayer::TestCapability(const char *pszCap) -> int
 /************************************************************************/
 /*                           GetSpatialRef()                            */
 /************************************************************************/
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,12,0)
+auto OGRGRASSLayer::GetSpatialRef() const -> const OGRSpatialReference *
+#else
 auto OGRGRASSLayer::GetSpatialRef() -> OGRSpatialReference *
+#endif
 {
     return poSRS;
 }
