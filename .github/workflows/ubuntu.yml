@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir ${{ env.GDAL_AUTOLOAD_CMAKE_DIR }}
       - name: Set up Python for tests
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11
       - name: Install Python dependencies
