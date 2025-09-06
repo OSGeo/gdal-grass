@@ -186,7 +186,11 @@ auto OGRGRASSDataSource::Open(const char *pszNewName, bool /*bUpdate*/,
 /************************************************************************/
 /*                           TestCapability()                           */
 /************************************************************************/
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,12,0)
+auto OGRGRASSDataSource::TestCapability(const char * /* pszCap*/) const -> int
+#else
 auto OGRGRASSDataSource::TestCapability(const char * /* pszCap*/) -> int
+#endif
 {
     return FALSE;
 }
@@ -194,7 +198,11 @@ auto OGRGRASSDataSource::TestCapability(const char * /* pszCap*/) -> int
 /************************************************************************/
 /*                              GetLayer()                              */
 /************************************************************************/
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,12,0)
+auto OGRGRASSDataSource::GetLayer(int iLayer) const -> const OGRLayer *
+#else
 auto OGRGRASSDataSource::GetLayer(int iLayer) -> OGRLayer *
+#endif
 {
     if (iLayer < 0 || iLayer >= nLayers)
         return nullptr;

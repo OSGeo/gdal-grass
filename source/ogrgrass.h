@@ -36,11 +36,20 @@ class OGRGRASSLayer final : public OGRLayer
     virtual ~OGRGRASSLayer();
 
     // Layer info
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,12,0)
+    auto GetName() const -> const char * override
+#else
     auto GetName() -> const char * override
+#endif
     {
         return osName.c_str();
     }
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,12,0)
+    auto GetLayerDefn() const -> const OGRFeatureDefn * override
+#else
     auto GetLayerDefn() -> OGRFeatureDefn * override
+#endif
     {
         return poFeatureDefn;
     }
@@ -58,8 +67,13 @@ class OGRGRASSLayer final : public OGRLayer
     }
 #endif
 
-    virtual auto GetSpatialRef() -> OGRSpatialReference * override;
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,12,0)
+    auto GetSpatialRef() const -> const OGRSpatialReference * override;
+    auto TestCapability(const char *) const -> int override;
+#else
+    auto GetSpatialRef() -> OGRSpatialReference * override;
     auto TestCapability(const char *) -> int override;
+#endif
 
     // Reading
     void ResetReading() override;
@@ -145,13 +159,23 @@ class OGRGRASSDataSource final : public OGRDataSource
     {
         return osName.c_str();
     }
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,12,0)
+    auto GetLayerCount() const -> int override
+#else
     auto GetLayerCount() -> int override
+#endif
     {
         return nLayers;
     }
-    auto GetLayer(int) -> OGRLayer * override;
 
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,12,0)
+    auto GetLayer(int) const -> const OGRLayer * override;
+    auto TestCapability(const char *) const -> int override;
+#else
+    auto GetLayer(int) -> OGRLayer * override;
     auto TestCapability(const char *) -> int override;
+#endif
 
   private:
     OGRGRASSLayer **papoLayers{nullptr};
