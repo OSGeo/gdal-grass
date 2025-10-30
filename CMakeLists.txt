@@ -31,10 +31,10 @@ find_package(PostgreSQL)
 find_package(PROJ)
 
 if(NOT AUTOLOAD_DIR)
-  exec_program(
-    ${GDAL_CONFIG} ARGS
-    --prefix
-    OUTPUT_VARIABLE GDALPREFIX)
+  execute_process(
+    COMMAND ${GDAL_CONFIG} --prefix
+    OUTPUT_VARIABLE GDALPREFIX
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
   set(AUTOLOAD_DIR ${GDALPREFIX}/lib/gdalplugins)
   if(NOT AUTOLOAD_DIR)
     message(FATAL_ERROR "Could not set GDAL plugin path")
