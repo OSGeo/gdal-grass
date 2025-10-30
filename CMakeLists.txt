@@ -14,13 +14,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ##############################################################################
 # Project and version
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MAJOR "2")
 set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "3")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(VERSION_SUFFIX "rc1")
 set(COMPLETE_VERSION
     ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}
 )
+set(RELEASE_NAME ${COMPLETE_VERSION}${VERSION_SUFFIX})
+
 project(gdal-grass VERSION ${COMPLETE_VERSION})
+
+message(STATUS "gdal-grass version ${RELEASE_NAME}")
+
 include(CTest)
 
 # ##############################################################################
