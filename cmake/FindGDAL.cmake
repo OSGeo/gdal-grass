@@ -130,10 +130,10 @@ else(WIN32)
       if(GDAL_CONFIG)
 
         # extract gdal version
-        exec_program(
-          ${GDAL_CONFIG} ARGS
-          --version
-          OUTPUT_VARIABLE GDAL_VERSION)
+        execute_process(
+          COMMAND ${GDAL_CONFIG} --version
+          OUTPUT_VARIABLE GDAL_VERSION
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
         string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1"
                              GDAL_VERSION_MAJOR "${GDAL_VERSION}")
         string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\2"
@@ -168,19 +168,19 @@ else(WIN32)
           AND (GDAL_VERSION_MICRO LESS 3))
 
         # set INCLUDE_DIR to prefix+include
-        exec_program(
-          ${GDAL_CONFIG} ARGS
-          --prefix
-          OUTPUT_VARIABLE GDAL_PREFIX)
+        execute_process(
+          COMMAND ${GDAL_CONFIG} --prefix
+          OUTPUT_VARIABLE GDAL_PREFIX
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
         # SET(GDAL_INCLUDE_DIR ${GDAL_PREFIX}/include CACHE STRING INTERNAL)
         find_path(GDAL_INCLUDE_DIR gdal.h ${GDAL_PREFIX}/include/gdal
                   ${GDAL_PREFIX}/include /usr/local/include /usr/include)
 
         # extract link dirs for rpath
-        exec_program(
-          ${GDAL_CONFIG} ARGS
-          --libs
-          OUTPUT_VARIABLE GDAL_CONFIG_LIBS)
+        execute_process(
+          COMMAND ${GDAL_CONFIG} --libs
+          OUTPUT_VARIABLE GDAL_CONFIG_LIBS
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
 
         # split off the link dirs (for rpath) use regular expression to match
         # wildcard equivalent "-L*<endchar>" with <endchar> is a space or a
