@@ -49,4 +49,4 @@ if(NOT PROJ_FOUND)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(PROJ REQUIRED_VARS PROJ_INCLUDE_DIRS PROJ_FOUND)
+find_package_handle_standard_args(PROJ REQUIRED_VARS PROJ_INCLUDE_DIRS)

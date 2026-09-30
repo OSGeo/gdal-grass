@@ -89,7 +89,7 @@ if(NOT PostgreSQL_FOUND)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(PostgreSQL REQUIRED_VARS PostgreSQL_INCLUDE_DIR PostgreSQL_FOUND)
+find_package_handle_standard_args(PostgreSQL REQUIRED_VARS PostgreSQL_INCLUDE_DIR)
 
 if(PostgreSQL_FOUND)
   set(PostgreSQL_INCLUDE_DIRS ${PostgreSQL_INCLUDE_DIR})
